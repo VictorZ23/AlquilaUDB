@@ -1,0 +1,20 @@
+# Archivos generados por Maven
+target/
+
+# Archivos de NetBeans
+nbproject/private/
+
+# Archivos compilados
+*.class
+
+# Logs
+*.log
+
+# Archivos temporales
+*.tmp
+*.temp
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
