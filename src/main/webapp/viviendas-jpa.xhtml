@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+<h:head>
+    <title>Viviendas con JPA - AlquilaUDB</title>
+    <meta charset="UTF-8" />
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 35px;
+            background-color: #f5f6fa;
+        }
+
+        h1 {
+            color: #243b55;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #243b55;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .enlaces {
+            margin-top: 25px;
+        }
+    </style>
+</h:head>
+
+<h:body>
+
+    <h1>AlquilaUDB - Viviendas con JPA</h1>
+
+    <p>
+        Listado obtenido mediante JSF, CDI y Hibernate.
+    </p>
+
+    <h:panelGroup
+        rendered="#{empty viviendaJpaBean.viviendas}">
+        <p>No hay viviendas registradas.</p>
+    </h:panelGroup>
+
+    <h:dataTable
+        value="#{viviendaJpaBean.viviendas}"
+        var="v"
+        rendered="#{not empty viviendaJpaBean.viviendas}">
+
+        <h:column>
+            <f:facet xmlns:f="http://xmlns.jcp.org/jsf/core"
+                     name="header">ID</f:facet>
+            #{v.id}
+        </h:column>
+
+        <h:column>
+            <f:facet xmlns:f="http://xmlns.jcp.org/jsf/core"
+                     name="header">Título</f:facet>
+            <h:outputText value="#{v.titulo}" />
+        </h:column>
+
+        <h:column>
+            <f:facet xmlns:f="http://xmlns.jcp.org/jsf/core"
+                     name="header">Tipo</f:facet>
+            <h:outputText value="#{v.tipo}" />
+        </h:column>
+
+        <h:column>
+            <f:facet xmlns:f="http://xmlns.jcp.org/jsf/core"
+                     name="header">Zona</f:facet>
+            <h:outputText value="#{v.zona}" />
+        </h:column>
+
+        <h:column>
+            <f:facet xmlns:f="http://xmlns.jcp.org/jsf/core"
+                     name="header">Precio</f:facet>
+            <h:outputText value="#{v.precio}">
+                <f:convertNumber
+                    xmlns:f="http://xmlns.jcp.org/jsf/core"
+                    minFractionDigits="2"
+                    maxFractionDigits="2" />
+            </h:outputText>
+        </h:column>
+
+        <h:column>
+            <f:facet xmlns:f="http://xmlns.jcp.org/jsf/core"
+                     name="header">Habitaciones</f:facet>
+            <h:outputText value="#{v.habitaciones}" />
+        </h:column>
+
+        <h:column>
+            <f:facet xmlns:f="http://xmlns.jcp.org/jsf/core"
+                     name="header">Disponible</f:facet>
+            <h:outputText
+                value="#{v.disponible ? 'Sí' : 'No'}" />
+        </h:column>
+
+    </h:dataTable>
+
+    <div class="enlaces">
+        <a href="vivienda">Ver listado anterior (JDBC)</a>
+    </div>
+
+</h:body>
+</html>
+

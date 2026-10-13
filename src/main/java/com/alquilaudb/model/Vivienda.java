@@ -1,25 +1,67 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package com.alquilaudb.model;
 
-/**
- *
- * @author Admin
- */
-public class Vivienda {
-    
+import java.io.Serializable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "vivienda")
+public class Vivienda implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private int id;
+
+    @Column(name = "titulo")
     private String titulo;
+
+    @Column(name = "tipo")
     private String tipo;
+
+    @Column(name = "direccion")
     private String direccion;
+
+    @Column(name = "zona")
     private String zona;
+
+    @Column(name = "precio")
     private double precio;
+
+    @Column(name = "habitaciones")
     private int habitaciones;
+
+    @Column(name = "descripcion")
     private String descripcion;
+
+    @Column(name = "disponible")
     private boolean disponible;
+
+    public Vivienda() {
+    }
+
+    public Vivienda(int id, String titulo, String tipo,
+            String direccion, String zona, double precio,
+            int habitaciones, String descripcion,
+            boolean disponible) {
+
+        this.id = id;
+        this.titulo = titulo;
+        this.tipo = tipo;
+        this.direccion = direccion;
+        this.zona = zona;
+        this.precio = precio;
+        this.habitaciones = habitaciones;
+        this.descripcion = descripcion;
+        this.disponible = disponible;
+    }
 
     public int getId() {
         return id;
@@ -92,26 +134,4 @@ public class Vivienda {
     public void setDisponible(boolean disponible) {
         this.disponible = disponible;
     }
-
-    public Vivienda() {
-        
-    }
-    
-    public Vivienda(int id, String titulo, String tipo, String direccion,
-        String zona, double precio, int habitaciones,
-        String descripcion, boolean disponible) {
-    
-    this.id = id;
-    this.titulo = titulo;
-    this.tipo = tipo;
-    this.direccion = direccion;
-    this.zona = zona;
-    this.precio = precio;
-    this.habitaciones = habitaciones;
-    this.descripcion = descripcion;
-    this.disponible = disponible;
 }
-}
-
-
-
