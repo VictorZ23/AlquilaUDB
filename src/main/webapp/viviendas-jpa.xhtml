@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://xmlns.jcp.org/jsf/html">
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
 
 <h:head>
+
     <title>Viviendas con JPA - AlquilaUDB</title>
+
     <meta charset="UTF-8" />
 
     <style>
@@ -11,6 +14,7 @@
             font-family: Arial, sans-serif;
             margin: 35px;
             background-color: #f5f6fa;
+            color: #243b55;
         }
 
         h1 {
@@ -39,9 +43,49 @@
         }
 
         .enlaces {
-            margin-top: 25px;
+            margin: 20px 0;
+        }
+
+        .enlaces a {
+            margin-right: 18px;
+        }
+
+        .acciones {
+            white-space: nowrap;
+        }
+
+        .editar {
+            font-weight: bold;
+            color: #245c9a;
+            margin-right: 10px;
+        }
+
+        .eliminar {
+            background-color: #b02a37;
+            color: white;
+            padding: 7px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .eliminar:hover {
+            background-color: #842029;
+        }
+
+        .error {
+            color: #b00020;
+            font-weight: bold;
+            margin: 12px 0;
+        }
+
+        .sin-registros {
+            padding: 15px;
+            background-color: white;
+            border: 1px solid #ddd;
         }
     </style>
+
 </h:head>
 
 <h:body>
@@ -52,70 +96,146 @@
         Listado obtenido mediante JSF, CDI y Hibernate.
     </p>
 
-    <h:panelGroup
-        rendered="#{empty viviendaJpaBean.viviendas}">
-        <p>No hay viviendas registradas.</p>
-    </h:panelGroup>
-
-    <h:dataTable
-        value="#{viviendaJpaBean.viviendas}"
-        var="v"
-        rendered="#{not empty viviendaJpaBean.viviendas}">
-
-        <h:column>
-            <f:facet xmlns:f="http://xmlns.jcp.org/jsf/core"
-                     name="header">ID</f:facet>
-            #{v.id}
-        </h:column>
-
-        <h:column>
-            <f:facet xmlns:f="http://xmlns.jcp.org/jsf/core"
-                     name="header">Título</f:facet>
-            <h:outputText value="#{v.titulo}" />
-        </h:column>
-
-        <h:column>
-            <f:facet xmlns:f="http://xmlns.jcp.org/jsf/core"
-                     name="header">Tipo</f:facet>
-            <h:outputText value="#{v.tipo}" />
-        </h:column>
-
-        <h:column>
-            <f:facet xmlns:f="http://xmlns.jcp.org/jsf/core"
-                     name="header">Zona</f:facet>
-            <h:outputText value="#{v.zona}" />
-        </h:column>
-
-        <h:column>
-            <f:facet xmlns:f="http://xmlns.jcp.org/jsf/core"
-                     name="header">Precio</f:facet>
-            <h:outputText value="#{v.precio}">
-                <f:convertNumber
-                    xmlns:f="http://xmlns.jcp.org/jsf/core"
-                    minFractionDigits="2"
-                    maxFractionDigits="2" />
-            </h:outputText>
-        </h:column>
-
-        <h:column>
-            <f:facet xmlns:f="http://xmlns.jcp.org/jsf/core"
-                     name="header">Habitaciones</f:facet>
-            <h:outputText value="#{v.habitaciones}" />
-        </h:column>
-
-        <h:column>
-            <f:facet xmlns:f="http://xmlns.jcp.org/jsf/core"
-                     name="header">Disponible</f:facet>
-            <h:outputText
-                value="#{v.disponible ? 'Sí' : 'No'}" />
-        </h:column>
-
-    </h:dataTable>
+    <!-- ENLACES PRINCIPALES -->
 
     <div class="enlaces">
-        <a href="vivienda">Ver listado anterior (JDBC)</a>
+
+        <h:link
+            outcome="/registrar-vivienda"
+            value="Registrar nueva vivienda" />
+
+        <a href="vivienda">
+            Ver listado anterior (JDBC)
+        </a>
+
     </div>
+
+    <!-- FORMULARIO PARA LAS ACCIONES -->
+
+    <h:form id="formularioListado">
+
+        <h:messages
+            globalOnly="true"
+            styleClass="error" />
+
+        <!-- MENSAJE CUANDO NO HAY REGISTROS -->
+
+        <h:panelGroup
+            rendered="#{empty viviendaJpaBean.viviendas}">
+
+            <div class="sin-registros">
+                No hay viviendas registradas.
+            </div>
+
+        </h:panelGroup>
+
+        <!-- TABLA DE VIVIENDAS -->
+
+        <h:dataTable
+            id="tablaViviendas"
+            value="#{viviendaJpaBean.viviendas}"
+            var="v"
+            rendered="#{not empty viviendaJpaBean.viviendas}">
+
+            <!-- ID -->
+
+            <h:column>
+                <f:facet name="header">ID</f:facet>
+
+                <h:outputText value="#{v.id}" />
+            </h:column>
+
+            <!-- TITULO -->
+
+            <h:column>
+                <f:facet name="header">Título</f:facet>
+
+                <h:outputText value="#{v.titulo}" />
+            </h:column>
+
+            <!-- TIPO -->
+
+            <h:column>
+                <f:facet name="header">Tipo</f:facet>
+
+                <h:outputText value="#{v.tipo}" />
+            </h:column>
+
+            <!-- ZONA -->
+
+            <h:column>
+                <f:facet name="header">Zona</f:facet>
+
+                <h:outputText value="#{v.zona}" />
+            </h:column>
+
+            <!-- PRECIO -->
+
+            <h:column>
+                <f:facet name="header">Precio</f:facet>
+
+                <h:outputText value="#{v.precio}">
+                    <f:convertNumber
+                        minFractionDigits="2"
+                        maxFractionDigits="2" />
+                </h:outputText>
+            </h:column>
+
+            <!-- HABITACIONES -->
+
+            <h:column>
+                <f:facet name="header">Habitaciones</f:facet>
+
+                <h:outputText value="#{v.habitaciones}" />
+            </h:column>
+
+            <!-- DISPONIBILIDAD -->
+
+            <h:column>
+                <f:facet name="header">Disponible</f:facet>
+
+                <h:outputText
+                    value="#{v.disponible ? 'Sí' : 'No'}" />
+            </h:column>
+
+            <!-- ACCIONES -->
+
+            <h:column>
+
+                <f:facet name="header">Acciones</f:facet>
+
+                <h:panelGroup
+                    layout="block"
+                    styleClass="acciones">
+
+                    <!-- EDITAR -->
+
+                    <h:link
+                        outcome="/editar-vivienda"
+                        value="Editar"
+                        styleClass="editar">
+
+                        <f:param
+                            name="id"
+                            value="#{v.id}" />
+
+                    </h:link>
+
+                    <!-- ELIMINAR -->
+
+                    <h:commandButton
+                        value="Eliminar"
+                        action="#{viviendaJpaBean.eliminar(v.id)}"
+                        styleClass="eliminar"
+                        onclick="return confirm('¿Deseas eliminar esta vivienda? Esta acción no se puede deshacer.');" />
+
+                </h:panelGroup>
+
+            </h:column>
+
+        </h:dataTable>
+
+    </h:form>
 
 </h:body>
 </html>
-

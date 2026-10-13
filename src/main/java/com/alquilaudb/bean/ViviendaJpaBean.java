@@ -3,7 +3,11 @@ package com.alquilaudb.bean;
 import com.alquilaudb.jpa.ViviendaJpaDAO;
 import com.alquilaudb.model.Vivienda;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -11,11 +15,15 @@ import javax.inject.Named;
 @RequestScoped
 public class ViviendaJpaBean {
 
+    private static final Logger LOGGER =
+            Logger.getLogger(ViviendaJpaBean.class.getName());
+
     @Inject
     private ViviendaJpaDAO viviendaJpaDAO;
 
     private List<Vivienda> viviendas;
 
+    // OBTENER LISTADO
     public List<Vivienda> getViviendas() {
 
         if (viviendas == null) {
@@ -24,5 +32,38 @@ public class ViviendaJpaBean {
 
         return viviendas;
     }
-}
 
+    // ELIMINAR VIVIENDA
+    public String eliminar(int id) {
+
+        try {
+
+            viviendaJpaDAO.eliminar(id);
+
+            // Volver al listado actualizado
+            return "/viviendas-jpa.xhtml?faces-redirect=true";
+
+        } catch (RuntimeException e) {
+
+            LOGGER.log(
+                    Level.SEVERE,
+                    "Error al eliminar la vivienda con ID: " + id,
+                    e
+            );
+
+            FacesContext.getCurrentInstance().addMessage(
+                    null,
+                    new FacesMessage(
+                            FacesMessage.SEVERITY_ERROR,
+                            "No se pudo eliminar la vivienda.",
+                            "Comprueba que el registro exista y no tenga restricciones en la base de datos."
+                    )
+            );
+
+            // Volver a consultar los registros
+            viviendas = null;
+
+            return null;
+        }
+    }
+}

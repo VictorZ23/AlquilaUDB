@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+<f:metadata>
+    <f:viewParam
+        name="id"
+        value="#{editarViviendaBean.id}" />
+
+    <f:viewAction
+        action="#{editarViviendaBean.cargar}"
+        onPostback="false" />
+</f:metadata>
+
+<h:head>
+
+    <title>Editar vivienda - AlquilaUDB</title>
+
+    <meta charset="UTF-8" />
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f6fa;
+            margin: 35px;
+            color: #243b55;
+        }
+
+        .contenedor {
+            max-width: 650px;
+            background-color: white;
+            padding: 30px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        .campo {
+            margin-bottom: 18px;
+        }
+
+        .etiqueta {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        .entrada {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #aaa;
+            border-radius: 4px;
+        }
+
+        .error {
+            color: #b00020;
+            display: block;
+            margin-top: 5px;
+            font-size: 13px;
+        }
+
+        .boton {
+            padding: 12px 20px;
+            background-color: #243b55;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .enlace {
+            display: inline-block;
+            margin-top: 20px;
+        }
+    </style>
+
+</h:head>
+
+<h:body>
+
+    <h1>Editar vivienda</h1>
+
+    <h:panelGroup rendered="#{empty editarViviendaBean.vivienda}">
+        <p>No se encontró la vivienda solicitada.</p>
+        <a href="viviendas-jpa.xhtml">
+            Volver al listado
+        </a>
+    </h:panelGroup>
+
+    <h:panelGroup rendered="#{not empty editarViviendaBean.vivienda}">
+
+        <div class="contenedor">
+
+            <h:form id="formulario">
+
+                <h:messages
+                    globalOnly="true"
+                    styleClass="error" />
+
+                <p>
+                    <strong>ID de vivienda:</strong>
+                    <h:outputText
+                        value="#{editarViviendaBean.vivienda.id}" />
+                </p>
+
+                <!-- TITULO -->
+
+                <div class="campo">
+
+                    <h:outputLabel
+                        for="titulo"
+                        value="Título:"
+                        styleClass="etiqueta" />
+
+                    <h:inputText
+                        id="titulo"
+                        value="#{editarViviendaBean.vivienda.titulo}"
+                        required="true"
+                        requiredMessage="El título es obligatorio."
+                        validatorMessage="El título debe tener entre 5 y 100 caracteres."
+                        styleClass="entrada">
+
+                        <f:validateLength
+                            minimum="5"
+                            maximum="100" />
+
+                        <f:ajax
+                            event="blur"
+                            execute="@this"
+                            render="mensajeTitulo" />
+
+                    </h:inputText>
+
+                    <h:panelGroup
+                        id="mensajeTitulo"
+                        layout="block">
+
+                        <h:message
+                            for="titulo"
+                            styleClass="error" />
+
+                    </h:panelGroup>
+
+                </div>
+
+                <!-- TIPO -->
+
+                <div class="campo">
+
+                    <h:outputLabel
+                        for="tipo"
+                        value="Tipo de vivienda:"
+                        styleClass="etiqueta" />
+
+                    <h:selectOneMenu
+                        id="tipo"
+                        value="#{editarViviendaBean.vivienda.tipo}"
+                        required="true"
+                        requiredMessage="Selecciona un tipo de vivienda."
+                        styleClass="entrada">
+
+                        <f:selectItem
+                            itemLabel="Selecciona una opción"
+                            itemValue=""
+                            noSelectionOption="true" />
+
+                        <f:selectItem
+                            itemLabel="Casa"
+                            itemValue="Casa" />
+
+                        <f:selectItem
+                            itemLabel="Apartamento"
+                            itemValue="Apartamento" />
+
+                        <f:selectItem
+                            itemLabel="Habitación"
+                            itemValue="Habitación" />
+
+                    </h:selectOneMenu>
+
+                    <h:message
+                        for="tipo"
+                        styleClass="error" />
+
+                </div>
+
+                <!-- DIRECCION -->
+
+                <div class="campo">
+
+                    <h:outputLabel
+                        for="direccion"
+                        value="Dirección:"
+                        styleClass="etiqueta" />
+
+                    <h:inputText
+                        id="direccion"
+                        value="#{editarViviendaBean.vivienda.direccion}"
+                        required="true"
+                        requiredMessage="La dirección es obligatoria."
+                        validatorMessage="La dirección debe tener entre 5 y 150 caracteres."
+                        styleClass="entrada">
+
+                        <f:validateLength
+                            minimum="5"
+                            maximum="150" />
+
+                    </h:inputText>
+
+                    <h:message
+                        for="direccion"
+                        styleClass="error" />
+
+                </div>
+
+                <!-- ZONA -->
+
+                <div class="campo">
+
+                    <h:outputLabel
+                        for="zona"
+                        value="Zona:"
+                        styleClass="etiqueta" />
+
+                    <h:inputText
+                        id="zona"
+                        value="#{editarViviendaBean.vivienda.zona}"
+                        required="true"
+                        requiredMessage="La zona es obligatoria."
+                        validatorMessage="La zona debe tener entre 2 y 100 caracteres."
+                        styleClass="entrada">
+
+                        <f:validateLength
+                            minimum="2"
+                            maximum="100" />
+
+                    </h:inputText>
+
+                    <h:message
+                        for="zona"
+                        styleClass="error" />
+
+                </div>
+
+                <!-- PRECIO -->
+
+                <div class="campo">
+
+                    <h:outputLabel
+                        for="precio"
+                        value="Precio mensual ($):"
+                        styleClass="etiqueta" />
+
+                    <h:inputText
+                        id="precio"
+                        value="#{editarViviendaBean.vivienda.precio}"
+                        required="true"
+                        requiredMessage="El precio es obligatorio."
+                        validatorMessage="El precio debe estar entre $0.01 y $100,000.00."
+                        styleClass="entrada">
+
+                        <f:convertNumber locale="en_US" />
+
+                        <f:validateDoubleRange
+                            minimum="0.01"
+                            maximum="100000.00" />
+
+                        <f:ajax
+                            event="blur"
+                            execute="@this"
+                            render="mensajePrecio" />
+
+                    </h:inputText>
+
+                    <h:panelGroup
+                        id="mensajePrecio"
+                        layout="block">
+
+                        <h:message
+                            for="precio"
+                            styleClass="error" />
+
+                    </h:panelGroup>
+
+                </div>
+
+                <!-- HABITACIONES -->
+
+                <div class="campo">
+
+                    <h:outputLabel
+                        for="habitaciones"
+                        value="Número de habitaciones:"
+                        styleClass="etiqueta" />
+
+                    <h:inputText
+                        id="habitaciones"
+                        value="#{editarViviendaBean.vivienda.habitaciones}"
+                        required="true"
+                        requiredMessage="El número de habitaciones es obligatorio."
+                        validatorMessage="Debe indicar entre 1 y 50 habitaciones."
+                        styleClass="entrada">
+
+                        <f:validateLongRange
+                            minimum="1"
+                            maximum="50" />
+
+                        <f:ajax
+                            event="blur"
+                            execute="@this"
+                            render="mensajeHabitaciones" />
+
+                    </h:inputText>
+
+                    <h:panelGroup
+                        id="mensajeHabitaciones"
+                        layout="block">
+
+                        <h:message
+                            for="habitaciones"
+                            styleClass="error" />
+
+                    </h:panelGroup>
+
+                </div>
+
+                <!-- DESCRIPCION -->
+
+                <div class="campo">
+
+                    <h:outputLabel
+                        for="descripcion"
+                        value="Descripción:"
+                        styleClass="etiqueta" />
+
+                    <h:inputTextarea
+                        id="descripcion"
+                        value="#{editarViviendaBean.vivienda.descripcion}"
+                        rows="5"
+                        styleClass="entrada" />
+
+                </div>
+
+                <!-- DISPONIBILIDAD -->
+
+                <div class="campo">
+
+                    <h:selectBooleanCheckbox
+                        id="disponible"
+                        value="#{editarViviendaBean.vivienda.disponible}" />
+
+                    <h:outputLabel
+                        for="disponible"
+                        value=" Vivienda disponible" />
+
+                </div>
+
+                <!-- ACTUALIZAR -->
+
+                <h:commandButton
+                    value="Guardar cambios"
+                    action="#{editarViviendaBean.actualizar}"
+                    styleClass="boton" />
+
+            </h:form>
+
+        </div>
+
+    </h:panelGroup>
+
+    <a href="viviendas-jpa.xhtml" class="enlace">
+        Volver al listado de viviendas
+    </a>
+
+</h:body>
+</html>
