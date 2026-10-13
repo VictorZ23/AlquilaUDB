@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+<f:metadata>
+
+    <f:viewParam
+        name="id"
+        value="#{detalleViviendaBean.id}" />
+
+    <f:viewAction
+        action="#{detalleViviendaBean.cargar}"
+        onPostback="false" />
+
+</f:metadata>
+
+<h:head>
+
+    <title>Detalle de vivienda - AlquilaUDB</title>
+
+    <meta charset="UTF-8" />
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f6fa;
+            color: #243b55;
+            margin: 35px;
+        }
+
+        .contenedor {
+            max-width: 850px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 30px;
+        }
+
+        h1 {
+            margin-bottom: 25px;
+        }
+
+        h2 {
+            color: #243b55;
+            margin-top: 0;
+        }
+
+        .fila {
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .etiqueta {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .valor {
+            color: #333;
+        }
+
+        .descripcion {
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+
+        .disponible {
+            color: #287a49;
+            font-weight: bold;
+        }
+
+        .noDisponible {
+            color: #b02a37;
+            font-weight: bold;
+        }
+
+        .acciones {
+            margin-top: 25px;
+        }
+
+        .acciones a {
+            display: inline-block;
+            margin-right: 18px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #245c9a;
+        }
+
+        .aviso {
+            background-color: white;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            max-width: 600px;
+        }
+    </style>
+
+</h:head>
+
+<h:body>
+
+    <h1>AlquilaUDB - Detalle de vivienda</h1>
+
+    <!-- VIVIENDA NO ENCONTRADA -->
+
+    <h:panelGroup
+        rendered="#{empty detalleViviendaBean.vivienda}">
+
+        <div class="aviso">
+
+            <h2>Vivienda no encontrada</h2>
+
+            <p>
+                No existe una vivienda con el identificador
+                solicitado.
+            </p>
+
+            <h:link
+                outcome="/viviendas-jpa"
+                value="Volver al listado" />
+
+        </div>
+
+    </h:panelGroup>
+
+    <!-- VIVIENDA ENCONTRADA -->
+
+    <h:panelGroup
+        rendered="#{not empty detalleViviendaBean.vivienda}">
+
+        <div class="contenedor">
+
+            <h2>
+                <h:outputText
+                    value="#{detalleViviendaBean.vivienda.titulo}" />
+            </h2>
+
+            <!-- IDENTIFICADOR -->
+
+            <div class="fila">
+
+                <span class="etiqueta">Identificador:</span>
+
+                <h:outputText
+                    value="#{detalleViviendaBean.vivienda.id}"
+                    styleClass="valor" />
+
+            </div>
+
+            <!-- TIPO -->
+
+            <div class="fila">
+
+                <span class="etiqueta">Tipo de vivienda:</span>
+
+                <h:outputText
+                    value="#{detalleViviendaBean.vivienda.tipo}"
+                    styleClass="valor" />
+
+            </div>
+
+            <!-- DIRECCION -->
+
+            <div class="fila">
+
+                <span class="etiqueta">Dirección:</span>
+
+                <h:outputText
+                    value="#{detalleViviendaBean.vivienda.direccion}"
+                    styleClass="valor" />
+
+            </div>
+
+            <!-- ZONA -->
+
+            <div class="fila">
+
+                <span class="etiqueta">Zona:</span>
+
+                <h:outputText
+                    value="#{detalleViviendaBean.vivienda.zona}"
+                    styleClass="valor" />
+
+            </div>
+
+            <!-- PRECIO -->
+
+            <div class="fila">
+
+                <span class="etiqueta">Precio mensual:</span>
+
+                <span class="valor">
+                    $
+
+                    <h:outputText
+                        value="#{detalleViviendaBean.vivienda.precio}">
+
+                        <f:convertNumber
+                            locale="en_US"
+                            minFractionDigits="2"
+                            maxFractionDigits="2" />
+
+                    </h:outputText>
+
+                </span>
+
+            </div>
+
+            <!-- HABITACIONES -->
+
+            <div class="fila">
+
+                <span class="etiqueta">
+                    Número de habitaciones:
+                </span>
+
+                <h:outputText
+                    value="#{detalleViviendaBean.vivienda.habitaciones}"
+                    styleClass="valor" />
+
+            </div>
+
+            <!-- DISPONIBILIDAD -->
+
+            <div class="fila">
+
+                <span class="etiqueta">Disponibilidad:</span>
+
+                <h:outputText
+                    value="Disponible"
+                    rendered="#{detalleViviendaBean.vivienda.disponible}"
+                    styleClass="disponible" />
+
+                <h:outputText
+                    value="No disponible"
+                    rendered="#{not detalleViviendaBean.vivienda.disponible}"
+                    styleClass="noDisponible" />
+
+            </div>
+
+            <!-- DESCRIPCION -->
+
+            <div class="fila">
+
+                <span class="etiqueta">Descripción:</span>
+
+                <h:outputText
+                    value="#{detalleViviendaBean.vivienda.descripcion}"
+                    rendered="#{not empty detalleViviendaBean.vivienda.descripcion}"
+                    styleClass="valor descripcion" />
+
+                <h:outputText
+                    value="Sin descripción registrada."
+                    rendered="#{empty detalleViviendaBean.vivienda.descripcion}"
+                    styleClass="valor" />
+
+            </div>
+
+            <!-- ACCIONES -->
+
+            <div class="acciones">
+
+                <h:link
+                    outcome="/editar-vivienda"
+                    value="Editar vivienda">
+
+                    <f:param
+                        name="id"
+                        value="#{detalleViviendaBean.vivienda.id}" />
+
+                </h:link>
+
+                <h:link
+                    outcome="/resenas"
+                    value="Ver reseñas">
+
+                    <f:param
+                        name="id"
+                        value="#{detalleViviendaBean.vivienda.id}" />
+
+                </h:link>
+
+                <h:link
+                    outcome="/viviendas-jpa"
+                    value="Volver al listado" />
+
+            </div>
+
+        </div>
+
+    </h:panelGroup>
+
+</h:body>
+</html>

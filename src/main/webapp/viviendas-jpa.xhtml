@@ -96,6 +96,12 @@
             white-space: nowrap;
         }
 
+        .detalle {
+            font-weight: bold;
+            color: #6c45a5;
+            margin-right: 12px;
+        }
+
         .editar {
             font-weight: bold;
             color: #245c9a;
@@ -141,6 +147,8 @@
         Consulta y administración de viviendas con JSF,
         CDI y Hibernate.
     </p>
+
+    <!-- ENLACES PRINCIPALES -->
 
     <div class="enlaces">
 
@@ -252,7 +260,7 @@
 
         </div>
 
-        <!-- RESULTADOS DE BUSQUEDA -->
+        <!-- RESULTADOS -->
 
         <h:panelGroup
             id="contenedorResultados"
@@ -267,39 +275,55 @@
 
             </h:panelGroup>
 
+            <!-- TABLA DE VIVIENDAS -->
+
             <h:dataTable
                 id="tablaViviendas"
                 value="#{viviendaJpaBean.viviendas}"
                 var="v"
                 rendered="#{not empty viviendaJpaBean.viviendas}">
 
+                <!-- ID -->
+
                 <h:column>
 
                     <f:facet name="header">ID</f:facet>
+
                     <h:outputText value="#{v.id}" />
 
                 </h:column>
 
+                <!-- TITULO -->
+
                 <h:column>
 
                     <f:facet name="header">Título</f:facet>
+
                     <h:outputText value="#{v.titulo}" />
 
                 </h:column>
 
+                <!-- TIPO -->
+
                 <h:column>
 
                     <f:facet name="header">Tipo</f:facet>
+
                     <h:outputText value="#{v.tipo}" />
 
                 </h:column>
 
+                <!-- ZONA -->
+
                 <h:column>
 
                     <f:facet name="header">Zona</f:facet>
+
                     <h:outputText value="#{v.zona}" />
 
                 </h:column>
+
+                <!-- PRECIO -->
 
                 <h:column>
 
@@ -308,6 +332,7 @@
                     <h:outputText value="#{v.precio}">
 
                         <f:convertNumber
+                            locale="en_US"
                             minFractionDigits="2"
                             maxFractionDigits="2" />
 
@@ -315,14 +340,17 @@
 
                 </h:column>
 
+                <!-- HABITACIONES -->
+
                 <h:column>
 
                     <f:facet name="header">Habitaciones</f:facet>
 
-                    <h:outputText
-                        value="#{v.habitaciones}" />
+                    <h:outputText value="#{v.habitaciones}" />
 
                 </h:column>
+
+                <!-- DISPONIBILIDAD -->
 
                 <h:column>
 
@@ -333,6 +361,8 @@
 
                 </h:column>
 
+                <!-- ACCIONES -->
+
                 <h:column>
 
                     <f:facet name="header">Acciones</f:facet>
@@ -340,6 +370,21 @@
                     <h:panelGroup
                         layout="block"
                         styleClass="acciones">
+
+                        <!-- VER DETALLE -->
+
+                        <h:link
+                            outcome="/detalle-vivienda"
+                            value="Ver detalle"
+                            styleClass="detalle">
+
+                            <f:param
+                                name="id"
+                                value="#{v.id}" />
+
+                        </h:link>
+
+                        <!-- EDITAR -->
 
                         <h:link
                             outcome="/editar-vivienda"
@@ -352,6 +397,8 @@
 
                         </h:link>
 
+                        <!-- RESEÑAS -->
+
                         <h:link
                             outcome="/resenas"
                             value="Ver reseñas"
@@ -362,6 +409,8 @@
                                 value="#{v.id}" />
 
                         </h:link>
+
+                        <!-- ELIMINAR -->
 
                         <h:commandButton
                             value="Eliminar"
