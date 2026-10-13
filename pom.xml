@@ -22,32 +22,47 @@
 
     <dependencies>
 
-        <!-- Controlador JDBC de MySQL -->
+        <!-- Driver JDBC de MySQL -->
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
             <version>8.0.33</version>
         </dependency>
 
-        <!-- API Java EE para Servlets y JSP -->
+        <!-- API de Java EE -->
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-web-api</artifactId>
-            <version>7.0</version>
+            <version>8.0.1</version>
             <scope>provided</scope>
         </dependency>
 
-        <!-- JSTL para las páginas JSP -->
+        <!-- JSTL para las JSP existentes -->
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>jstl</artifactId>
             <version>1.2</version>
         </dependency>
 
+        <!-- Implementación de JavaServer Faces 2.3 -->
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.faces</artifactId>
+            <version>2.3.9</version>
+        </dependency>
+        
+        
+        <!-- Implementación CDI para Tomcat 9 -->
+        <dependency>
+            <groupId>org.jboss.weld.servlet</groupId>
+            <artifactId>weld-servlet-shaded</artifactId>
+            <version>3.1.9.Final</version>
+        </dependency>
+
+
     </dependencies>
 
     <build>
-
         <plugins>
 
             <plugin>
@@ -73,7 +88,6 @@
             </plugin>
 
         </plugins>
-
     </build>
 
 </project>
