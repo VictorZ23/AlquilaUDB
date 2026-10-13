@@ -357,9 +357,8 @@
                         validatorMessage="El comentario debe tener entre 10 y 1000 caracteres."
                         styleClass="entrada">
 
-                        <f:validateLength
-                            minimum="10"
-                            maximum="1000" />
+                        <f:validator
+                        validatorId="comentarioResenaValidator" />
 
                         <f:ajax
                             event="blur"

@@ -3,6 +3,7 @@ package com.alquilaudb.jpa;
 import com.alquilaudb.model.Resena;
 import com.alquilaudb.model.Vivienda;
 import java.util.List;
+import java.util.Locale;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
@@ -10,6 +11,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
+import javax.persistence.TypedQuery;
 
 @ApplicationScoped
 public class ViviendaJpaDAO {
@@ -37,7 +39,71 @@ public class ViviendaJpaDAO {
         }
     }
 
-    // BUSCAR VIVIENDA POR ID
+    // BUSCAR VIVIENDAS CON FILTROS
+    public List<Vivienda> buscar(
+            String texto,
+            String tipo,
+            boolean soloDisponibles) {
+
+        EntityManager em = emf.createEntityManager();
+
+        try {
+
+            boolean tieneTexto =
+                    texto != null && !texto.trim().isEmpty();
+
+            boolean tieneTipo =
+                    tipo != null && !tipo.trim().isEmpty();
+
+            StringBuilder jpql = new StringBuilder(
+                    "SELECT v FROM Vivienda v WHERE 1 = 1"
+            );
+
+            if (tieneTexto) {
+                jpql.append(
+                        " AND (LOWER(v.titulo) LIKE :texto "
+                        + "OR LOWER(v.zona) LIKE :texto)"
+                );
+            }
+
+            if (tieneTipo) {
+                jpql.append(" AND v.tipo = :tipo");
+            }
+
+            if (soloDisponibles) {
+                jpql.append(" AND v.disponible = true");
+            }
+
+            jpql.append(" ORDER BY v.id");
+
+            TypedQuery<Vivienda> consulta =
+                    em.createQuery(
+                            jpql.toString(),
+                            Vivienda.class
+                    );
+
+            if (tieneTexto) {
+                consulta.setParameter(
+                        "texto",
+                        "%" + texto.trim().toLowerCase(Locale.ROOT) + "%"
+                );
+            }
+
+            if (tieneTipo) {
+                consulta.setParameter(
+                        "tipo",
+                        tipo.trim()
+                );
+            }
+
+            return consulta.getResultList();
+
+        } finally {
+            em.close();
+        }
+    }
+
+    // BUSCAR UNA VIVIENDA POR ID
     public Vivienda buscarPorId(int id) {
 
         EntityManager em = emf.createEntityManager();
@@ -50,13 +116,14 @@ public class ViviendaJpaDAO {
         }
     }
 
-    // REGISTRAR VIVIENDA
+    // REGISTRAR UNA VIVIENDA
     public void guardar(Vivienda vivienda) {
 
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
 
         try {
+
             tx.begin();
 
             em.persist(vivienda);
@@ -76,13 +143,14 @@ public class ViviendaJpaDAO {
         }
     }
 
-    // ACTUALIZAR VIVIENDA
+    // ACTUALIZAR UNA VIVIENDA
     public void actualizar(Vivienda vivienda) {
 
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
 
         try {
+
             tx.begin();
 
             Vivienda existente = em.find(
@@ -113,16 +181,20 @@ public class ViviendaJpaDAO {
         }
     }
 
-    // ELIMINAR VIVIENDA
+    // ELIMINAR UNA VIVIENDA
     public void eliminar(int id) {
 
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
 
         try {
+
             tx.begin();
 
-            Vivienda vivienda = em.find(Vivienda.class, id);
+            Vivienda vivienda = em.find(
+                    Vivienda.class,
+                    id
+            );
 
             if (vivienda == null) {
                 throw new IllegalArgumentException(
@@ -130,7 +202,7 @@ public class ViviendaJpaDAO {
                 );
             }
 
-            // COMPROBAR SI TIENE RESEÑAS
+            // VERIFICAR SI EXISTEN RESEÑAS ASOCIADAS
             Long cantidadResenas = em.createQuery(
                     "SELECT COUNT(r) FROM Resena r "
                     + "WHERE r.vivienda.id = :viviendaId",
@@ -146,7 +218,6 @@ public class ViviendaJpaDAO {
                 );
             }
 
-            // ELIMINAR SOLO SI NO TIENE RESEÑAS
             em.remove(vivienda);
 
             tx.commit();
@@ -170,6 +241,7 @@ public class ViviendaJpaDAO {
         EntityManager em = emf.createEntityManager();
 
         try {
+
             return em.createQuery(
                     "SELECT r FROM Resena r "
                     + "WHERE r.vivienda.id = :viviendaId "
@@ -184,7 +256,7 @@ public class ViviendaJpaDAO {
         }
     }
 
-    // REGISTRAR RESEÑA
+    // REGISTRAR UNA RESEÑA
     public void guardarResena(int viviendaId, Resena resena) {
 
         if (resena == null) {
@@ -223,6 +295,7 @@ public class ViviendaJpaDAO {
         EntityTransaction tx = em.getTransaction();
 
         try {
+
             tx.begin();
 
             Vivienda vivienda = em.find(
@@ -237,7 +310,11 @@ public class ViviendaJpaDAO {
             }
 
             resena.setAutor(resena.getAutor().trim());
-            resena.setComentario(resena.getComentario().trim());
+
+            resena.setComentario(
+                    resena.getComentario().trim()
+            );
+
             resena.setVivienda(vivienda);
 
             em.persist(resena);
@@ -257,6 +334,7 @@ public class ViviendaJpaDAO {
         }
     }
 
+    // LIBERAR LOS RECURSOS DE JPA
     @PreDestroy
     public void cerrar() {
 
