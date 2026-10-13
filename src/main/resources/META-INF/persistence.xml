@@ -15,6 +15,7 @@
         </provider>
         
         <class>com.alquilaudb.model.Vivienda</class>
+        <class>com.alquilaudb.model.Resena</class>
 
         <!-- Registraremos las entidades en el siguiente paso -->
         <exclude-unlisted-classes>true</exclude-unlisted-classes>

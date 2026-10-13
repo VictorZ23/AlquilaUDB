@@ -57,7 +57,13 @@
         .editar {
             font-weight: bold;
             color: #245c9a;
-            margin-right: 10px;
+            margin-right: 12px;
+        }
+
+        .resenas {
+            font-weight: bold;
+            color: #287a49;
+            margin-right: 12px;
         }
 
         .eliminar {
@@ -110,7 +116,7 @@
 
     </div>
 
-    <!-- FORMULARIO PARA LAS ACCIONES -->
+    <!-- FORMULARIO DE ACCIONES -->
 
     <h:form id="formularioListado">
 
@@ -118,7 +124,7 @@
             globalOnly="true"
             styleClass="error" />
 
-        <!-- MENSAJE CUANDO NO HAY REGISTROS -->
+        <!-- MENSAJE SIN VIVIENDAS -->
 
         <h:panelGroup
             rendered="#{empty viviendaJpaBean.viviendas}">
@@ -129,7 +135,7 @@
 
         </h:panelGroup>
 
-        <!-- TABLA DE VIVIENDAS -->
+        <!-- TABLA PRINCIPAL -->
 
         <h:dataTable
             id="tablaViviendas"
@@ -137,65 +143,82 @@
             var="v"
             rendered="#{not empty viviendaJpaBean.viviendas}">
 
-            <!-- ID -->
+            <!-- IDENTIFICADOR -->
 
             <h:column>
+
                 <f:facet name="header">ID</f:facet>
 
                 <h:outputText value="#{v.id}" />
+
             </h:column>
 
             <!-- TITULO -->
 
             <h:column>
+
                 <f:facet name="header">Título</f:facet>
 
                 <h:outputText value="#{v.titulo}" />
+
             </h:column>
 
             <!-- TIPO -->
 
             <h:column>
+
                 <f:facet name="header">Tipo</f:facet>
 
                 <h:outputText value="#{v.tipo}" />
+
             </h:column>
 
             <!-- ZONA -->
 
             <h:column>
+
                 <f:facet name="header">Zona</f:facet>
 
                 <h:outputText value="#{v.zona}" />
+
             </h:column>
 
             <!-- PRECIO -->
 
             <h:column>
+
                 <f:facet name="header">Precio</f:facet>
 
                 <h:outputText value="#{v.precio}">
+
                     <f:convertNumber
                         minFractionDigits="2"
                         maxFractionDigits="2" />
+
                 </h:outputText>
+
             </h:column>
 
             <!-- HABITACIONES -->
 
             <h:column>
+
                 <f:facet name="header">Habitaciones</f:facet>
 
-                <h:outputText value="#{v.habitaciones}" />
+                <h:outputText
+                    value="#{v.habitaciones}" />
+
             </h:column>
 
             <!-- DISPONIBILIDAD -->
 
             <h:column>
+
                 <f:facet name="header">Disponible</f:facet>
 
                 <h:outputText
                     value="#{v.disponible ? 'Sí' : 'No'}" />
+
             </h:column>
 
             <!-- ACCIONES -->
@@ -208,7 +231,7 @@
                     layout="block"
                     styleClass="acciones">
 
-                    <!-- EDITAR -->
+                    <!-- EDITAR VIVIENDA -->
 
                     <h:link
                         outcome="/editar-vivienda"
@@ -221,7 +244,20 @@
 
                     </h:link>
 
-                    <!-- ELIMINAR -->
+                    <!-- VER RESEÑAS -->
+
+                    <h:link
+                        outcome="/resenas"
+                        value="Ver reseñas"
+                        styleClass="resenas">
+
+                        <f:param
+                            name="id"
+                            value="#{v.id}" />
+
+                    </h:link>
+
+                    <!-- ELIMINAR VIVIENDA -->
 
                     <h:commandButton
                         value="Eliminar"

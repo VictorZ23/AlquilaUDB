@@ -40,30 +40,52 @@ public class ViviendaJpaBean {
 
             viviendaJpaDAO.eliminar(id);
 
-            // Volver al listado actualizado
             return "/viviendas-jpa.xhtml?faces-redirect=true";
+
+        } catch (IllegalStateException e) {
+
+            // LA VIVIENDA TIENE RESEÑAS
+            mostrarError(e.getMessage());
+
+            viviendas = null;
+            return null;
+
+        } catch (IllegalArgumentException e) {
+
+            // LA VIVIENDA NO EXISTE
+            mostrarError(e.getMessage());
+
+            viviendas = null;
+            return null;
 
         } catch (RuntimeException e) {
 
+            // OTROS ERRORES DE PERSISTENCIA
             LOGGER.log(
                     Level.SEVERE,
                     "Error al eliminar la vivienda con ID: " + id,
                     e
             );
 
-            FacesContext.getCurrentInstance().addMessage(
-                    null,
-                    new FacesMessage(
-                            FacesMessage.SEVERITY_ERROR,
-                            "No se pudo eliminar la vivienda.",
-                            "Comprueba que el registro exista y no tenga restricciones en la base de datos."
-                    )
+            mostrarError(
+                    "No se pudo eliminar la vivienda. "
+                    + "Comprueba las restricciones de la base de datos."
             );
 
-            // Volver a consultar los registros
             viviendas = null;
-
             return null;
         }
+    }
+
+    private void mostrarError(String mensaje) {
+
+        FacesContext.getCurrentInstance().addMessage(
+                null,
+                new FacesMessage(
+                        FacesMessage.SEVERITY_ERROR,
+                        mensaje,
+                        null
+                )
+        );
     }
 }

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+<f:metadata>
+
+    <f:viewParam
+        name="id"
+        value="#{resenaBean.viviendaId}" />
+
+    <f:viewAction
+        action="#{resenaBean.cargar}"
+        onPostback="false" />
+
+</f:metadata>
+
+<h:head>
+
+    <title>Reseñas de viviendas - AlquilaUDB</title>
+
+    <meta charset="UTF-8" />
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f6fa;
+            margin: 35px;
+            color: #243b55;
+        }
+
+        .contenedor {
+            max-width: 750px;
+            background-color: white;
+            padding: 25px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .campo {
+            margin-bottom: 18px;
+        }
+
+        .etiqueta {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        .entrada {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #aaa;
+            border-radius: 4px;
+        }
+
+        .error {
+            color: #b00020;
+            display: block;
+            margin-top: 5px;
+            font-size: 13px;
+        }
+
+        .boton {
+            padding: 12px 20px;
+            background-color: #243b55;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .boton:hover {
+            background-color: #365777;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background-color: #243b55;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .enlace {
+            display: inline-block;
+            margin-top: 15px;
+        }
+    </style>
+
+</h:head>
+
+<h:body>
+
+    <h1>Reseñas de viviendas</h1>
+
+    <!-- VIVIENDA NO ENCONTRADA -->
+
+    <h:panelGroup
+        rendered="#{empty resenaBean.vivienda}">
+
+        <p>No se encontró la vivienda solicitada.</p>
+
+    </h:panelGroup>
+
+    <!-- VIVIENDA ENCONTRADA -->
+
+    <h:panelGroup
+        rendered="#{not empty resenaBean.vivienda}">
+
+        <div class="contenedor">
+
+            <h2>
+                <h:outputText
+                    value="#{resenaBean.vivienda.titulo}" />
+            </h2>
+
+            <p>
+                <strong>Zona: </strong>
+                <h:outputText
+                    value="#{resenaBean.vivienda.zona}" />
+            </p>
+
+            <p>
+                <strong>Tipo: </strong>
+                <h:outputText
+                    value="#{resenaBean.vivienda.tipo}" />
+            </p>
+
+            <p>
+                <strong>Precio mensual: $</strong>
+
+                <h:outputText
+                    value="#{resenaBean.vivienda.precio}">
+
+                    <f:convertNumber
+                        minFractionDigits="2"
+                        maxFractionDigits="2" />
+
+                </h:outputText>
+            </p>
+
+        </div>
+
+        <!-- LISTADO DE RESEÑAS -->
+
+        <h2>Opiniones registradas</h2>
+
+        <h:panelGroup
+            rendered="#{empty resenaBean.resenas}">
+
+            <p>
+                Esta vivienda todavía no tiene reseñas.
+            </p>
+
+        </h:panelGroup>
+
+        <h:dataTable
+            value="#{resenaBean.resenas}"
+            var="r"
+            rendered="#{not empty resenaBean.resenas}">
+
+            <h:column>
+
+                <f:facet name="header">Autor</f:facet>
+
+                <h:outputText value="#{r.autor}" />
+
+            </h:column>
+
+            <h:column>
+
+                <f:facet name="header">Calificación</f:facet>
+
+                <h:outputText
+                    value="#{r.calificacion}" />
+
+                <h:outputText value=" / 5" />
+
+            </h:column>
+
+            <h:column>
+
+                <f:facet name="header">Comentario</f:facet>
+
+                <h:outputText
+                    value="#{r.comentario}" />
+
+            </h:column>
+
+            <h:column>
+
+                <f:facet name="header">Fecha</f:facet>
+
+                <h:outputText
+                    value="#{r.fecha}">
+
+                    <f:convertDateTime
+                        pattern="dd/MM/yyyy HH:mm"
+                        timeZone="America/El_Salvador" />
+
+                </h:outputText>
+
+            </h:column>
+
+        </h:dataTable>
+
+        <!-- FORMULARIO DE RESEÑA -->
+
+        <div class="contenedor">
+
+            <h2>Escribir una reseña</h2>
+
+            <h:form id="formularioResena">
+
+                <h:messages
+                    globalOnly="true"
+                    styleClass="error" />
+
+                <!-- NOMBRE DEL AUTOR -->
+
+                <div class="campo">
+
+                    <h:outputLabel
+                        for="autor"
+                        value="Nombre:"
+                        styleClass="etiqueta" />
+
+                    <h:inputText
+                        id="autor"
+                        value="#{resenaBean.nuevaResena.autor}"
+                        required="true"
+                        requiredMessage="El nombre es obligatorio."
+                        validatorMessage="El nombre debe tener entre 2 y 100 caracteres."
+                        styleClass="entrada">
+
+                        <f:validateLength
+                            minimum="2"
+                            maximum="100" />
+
+                        <f:ajax
+                            event="blur"
+                            execute="@this"
+                            render="mensajeAutor" />
+
+                    </h:inputText>
+
+                    <h:panelGroup
+                        id="mensajeAutor"
+                        layout="block">
+
+                        <h:message
+                            for="autor"
+                            styleClass="error" />
+
+                    </h:panelGroup>
+
+                </div>
+
+                <!-- CALIFICACION -->
+
+                <div class="campo">
+
+                    <h:outputLabel
+                        for="calificacion"
+                        value="Calificación:"
+                        styleClass="etiqueta" />
+
+                    <h:selectOneMenu
+                        id="calificacion"
+                        value="#{resenaBean.nuevaResena.calificacion}"
+                        required="true"
+                        requiredMessage="Selecciona una calificación."
+                        validatorMessage="La calificación debe estar entre 1 y 5."
+                        styleClass="entrada">
+
+                        <f:selectItem
+                            itemLabel="Selecciona una opción"
+                            itemValue="0"
+                            noSelectionOption="true" />
+
+                        <f:selectItem
+                            itemLabel="1 - Muy mala"
+                            itemValue="1" />
+
+                        <f:selectItem
+                            itemLabel="2 - Mala"
+                            itemValue="2" />
+
+                        <f:selectItem
+                            itemLabel="3 - Regular"
+                            itemValue="3" />
+
+                        <f:selectItem
+                            itemLabel="4 - Buena"
+                            itemValue="4" />
+
+                        <f:selectItem
+                            itemLabel="5 - Excelente"
+                            itemValue="5" />
+
+                        <f:validateLongRange
+                            minimum="1"
+                            maximum="5" />
+
+                        <f:ajax
+                            event="change"
+                            execute="@this"
+                            render="mensajeCalificacion" />
+
+                    </h:selectOneMenu>
+
+                    <h:panelGroup
+                        id="mensajeCalificacion"
+                        layout="block">
+
+                        <h:message
+                            for="calificacion"
+                            styleClass="error" />
+
+                    </h:panelGroup>
+
+                </div>
+
+                <!-- COMENTARIO -->
+
+                <div class="campo">
+
+                    <h:outputLabel
+                        for="comentario"
+                        value="Comentario:"
+                        styleClass="etiqueta" />
+
+                    <h:inputTextarea
+                        id="comentario"
+                        value="#{resenaBean.nuevaResena.comentario}"
+                        rows="5"
+                        required="true"
+                        requiredMessage="El comentario es obligatorio."
+                        validatorMessage="El comentario debe tener entre 10 y 1000 caracteres."
+                        styleClass="entrada">
+
+                        <f:validateLength
+                            minimum="10"
+                            maximum="1000" />
+
+                        <f:ajax
+                            event="blur"
+                            execute="@this"
+                            render="mensajeComentario" />
+
+                    </h:inputTextarea>
+
+                    <h:panelGroup
+                        id="mensajeComentario"
+                        layout="block">
+
+                        <h:message
+                            for="comentario"
+                            styleClass="error" />
+
+                    </h:panelGroup>
+
+                </div>
+
+                <!-- PUBLICAR -->
+
+                <h:commandButton
+                    value="Publicar reseña"
+                    action="#{resenaBean.registrar}"
+                    styleClass="boton" />
+
+            </h:form>
+
+        </div>
+
+    </h:panelGroup>
+
+    <h:link
+        outcome="/viviendas-jpa"
+        value="Volver al listado de viviendas"
+        styleClass="enlace" />
+
+</h:body>
+</html>

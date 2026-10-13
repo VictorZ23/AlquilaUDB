@@ -1,12 +1,15 @@
-
 package com.alquilaudb.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -43,6 +46,12 @@ public class Vivienda implements Serializable {
 
     @Column(name = "disponible")
     private boolean disponible;
+
+    @OneToMany(
+            mappedBy = "vivienda",
+            fetch = FetchType.LAZY
+    )
+    private List<Resena> resenas = new ArrayList<>();
 
     public Vivienda() {
     }
@@ -133,5 +142,13 @@ public class Vivienda implements Serializable {
 
     public void setDisponible(boolean disponible) {
         this.disponible = disponible;
+    }
+
+    public List<Resena> getResenas() {
+        return resenas;
+    }
+
+    public void setResenas(List<Resena> resenas) {
+        this.resenas = resenas;
     }
 }
