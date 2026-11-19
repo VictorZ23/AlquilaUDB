@@ -1,32 +1,20 @@
-\# AlquilaUDB — Product Backlog de la Fase III
+# AlquilaUDB — Product Backlog de la Fase III
 
+**Asignatura:** Desarrollo de Aplicaciones con Web Frameworks (DWF901)
 
+**Sprint:** III — Servicios REST e Integración de Clientes
 
-\*\*Asignatura:\*\* Desarrollo de Aplicaciones con Web Frameworks (DWF901)  
+**Proyecto:** AlquilaUDB
 
-\*\*Sprint:\*\* III — Servicios REST e Integración de Clientes  
+**Fecha de revisión:** 19 de noviembre de 2026
 
-\*\*Proyecto:\*\* AlquilaUDB  
-
-\*\*Fecha de revisión:\*\* 19 de noviembre de 2026
-
-
-
-\## 1. Objetivo del sprint
-
-
+## 1. Objetivo del sprint
 
 Extender AlquilaUDB mediante una API REST que permita consultar y gestionar viviendas y reseñas utilizando HTTP y JSON, reutilizando la persistencia JPA/Hibernate desarrollada durante la Fase II.
 
-
-
 El incremento incorpora un cliente consumidor independiente, validaciones, respuestas HTTP apropiadas y un mecanismo básico de autorización para las operaciones administrativas.
 
-
-
-\## 2. Historias de usuario
-
-
+## 2. Historias de usuario
 
 | ID | Historia de usuario | Prioridad | Estado |
 
@@ -66,19 +54,11 @@ El incremento incorpora un cliente consumidor independiente, validaciones, respu
 
 | HU-III-17 | Como evaluador, quiero disponer de evidencias visuales y documentación final de la Fase III. | Alta | Pendiente |
 
+## 3. Criterios de aceptación
 
-
-\## 3. Criterios de aceptación
-
-
-
-\### Servicios REST
-
-
+### Servicios REST
 
 Se considera aceptada la funcionalidad cuando:
-
-
 
 \- Los servicios se encuentran disponibles bajo `/AlquilaUDB/api`.
 
@@ -90,11 +70,7 @@ Se considera aceptada la funcionalidad cuando:
 
 \- La API respeta las restricciones de integridad entre viviendas y reseñas.
 
-
-
-\### Validaciones y errores
-
-
+### Validaciones y errores
 
 \- Los datos incorrectos son rechazados con HTTP 400.
 
@@ -106,11 +82,7 @@ Se considera aceptada la funcionalidad cuando:
 
 \- Los tipos de contenido incompatibles generan HTTP 415 con respuesta JSON.
 
-
-
-\### Seguridad
-
-
+### Seguridad
 
 \- Las consultas públicas no necesitan credenciales.
 
@@ -126,11 +98,7 @@ Se considera aceptada la funcionalidad cuando:
 
 \- La clave administrativa no se almacena dentro del repositorio.
 
-
-
-\### Cliente consumidor
-
-
+### Cliente consumidor
 
 \- Consulta viviendas utilizando `fetch()`.
 
@@ -142,95 +110,49 @@ Se considera aceptada la funcionalidad cuando:
 
 \- Dispone de mensajes de carga, éxito y error.
 
+## 4. Incremento desarrollado
 
-
-\## 4. Incremento desarrollado
-
-
-
-\### Configuración REST
-
-
+### Configuración REST
 
 Se incorporaron las dependencias necesarias de Jersey y Jackson al proyecto Maven.
 
-
-
 La clase `ApiConfig` configura los recursos REST, el filtro de seguridad y los manejadores de excepciones.
 
-
-
-\### Gestión de viviendas
-
-
+### Gestión de viviendas
 
 Se implementaron las operaciones GET, POST, PUT y DELETE.
 
-
-
 Los servicios reutilizan la persistencia JPA/Hibernate de la Fase II, evitando duplicar la lógica de acceso a datos.
 
-
-
-\### Gestión de reseñas
-
-
+### Gestión de reseñas
 
 Se implementaron la consulta y el registro de reseñas asociadas a viviendas.
 
-
-
 La API valida autor, calificación y comentario antes del registro.
 
-
-
-\### Seguridad
-
-
+### Seguridad
 
 Se implementó `SeguridadApiFilter` para controlar las solicitudes administrativas mediante una clave configurada como variable de entorno.
 
-
-
-\### Manejo de excepciones
-
-
+### Manejo de excepciones
 
 Se añadieron `JsonMalformadoMapper` y `TipoContenidoMapper` para devolver errores JSON uniformes ante solicitudes malformadas o formatos incompatibles.
 
-
-
-\### Cliente REST
-
-
+### Cliente REST
 
 Se desarrolló `cliente-rest.html` con JavaScript y `fetch()` como consumidor independiente de los servicios.
 
-
-
-\## 5. Pruebas del sprint
-
-
+## 5. Pruebas del sprint
 
 Se comprobaron operaciones satisfactorias de consulta, registro, actualización y eliminación, además de respuestas ante datos inválidos, recursos inexistentes y conflictos de integridad.
 
-
-
 También se verificaron los códigos HTTP 401, 403 y 503 correspondientes a situaciones de autorización y configuración administrativa.
-
-
 
 Las pruebas adicionales LIM-01 a LIM-10 se ejecutaron satisfactoriamente. En LIM-09 se verificó directamente en MySQL la persistencia de los cambios de disponibilidad. En LIM-10 se observó que el cliente detecta los fallos de conexión y recupera las consultas cuando se restablece el servidor.
 
-
-
 La información detallada se encuentra en `docs/matriz-pruebas-fase-III.md`.
 
-
-
-\## 6. Pendientes para el cierre
-
-
+## 6. Pendientes para el cierre
 
 | Tarea | Prioridad | Estado |
 
@@ -250,47 +172,24 @@ La información detallada se encuentra en `docs/matriz-pruebas-fase-III.md`.
 
 | Respaldar el Product Backlog en GitHub | Alta | Pendiente |
 
-
-
-\## 7. Consideraciones técnicas
-
-
+## 7. Consideraciones técnicas
 
 La autorización implementada se limita a los recursos REST protegidos. No constituye un sistema general de usuarios y roles para toda la aplicación.
 
-
-
 El registro público de reseñas conserva sus validaciones, pero requeriría medidas adicionales contra abusos si la aplicación se publicara en Internet.
-
-
 
 La API se ha desarrollado y comprobado en un entorno local de Tomcat y MySQL.
 
-
-
 El cliente JavaScript puede detectar fallos de comunicación; sin embargo, el mensaje técnico mostrado en esas circunstancias puede mejorarse para ofrecer una experiencia más comprensible.
 
-
-
-\## 8. Conclusión
-
-
+## 8. Conclusión
 
 La Fase III incorpora comunicación REST, serialización JSON, un cliente independiente, operaciones CRUD, validaciones y controles básicos de autorización.
 
-
-
 El sprint conserva la integración con las funcionalidades de las fases anteriores y proporciona un incremento funcional que puede comprobarse tanto desde herramientas HTTP como desde la interfaz web.
-
-
 
 Las pruebas funcionales, negativas, de límites y de seguridad se han completado. El trabajo restante se concentra en la revisión documental, la preparación de evidencias y el cierre de la entrega.
 
-
-
 \---
 
-
-
-\*\*Repositorio:\*\* https://github.com/VictorZ23/AlquilaUDB
-
+**Repositorio:** https://github.com/VictorZ23/AlquilaUDB
