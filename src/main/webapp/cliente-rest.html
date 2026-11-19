@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>AlquilaUDB - Cliente REST</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 30px;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: linear-gradient(135deg,
+                #f4f8ff, #dce7f5) fixed;
+            color: #203b60;
+        }
+
+        main {
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        h1, h2, h3 {
+            color: #203b60;
+        }
+
+        .panel {
+            background: white;
+            padding: 24px;
+            margin: 20px 0;
+            border-radius: 12px;
+            border: 1px solid #cfdbeb;
+            box-shadow: 0 5px 16px
+                rgba(31, 58, 93, 0.10);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns:
+                repeat(auto-fit, minmax(270px, 1fr));
+            gap: 16px;
+        }
+
+        .vivienda {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #cfdbeb;
+            box-shadow: 0 3px 10px
+                rgba(31, 58, 93, 0.08);
+        }
+
+        button {
+            padding: 10px 15px;
+            background: linear-gradient(
+                #345f90, #243f63);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #416e9f;
+        }
+
+        .estado {
+            margin: 15px 0;
+            font-weight: 600;
+        }
+
+        .resena {
+            padding: 12px;
+            border-bottom: 1px solid #dde5ef;
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+
+<main>
+
+    <h1>AlquilaUDB - Cliente REST</h1>
+
+    <p>
+        Consulta de viviendas y reseñas utilizando
+        JavaScript, HTTP y JSON.
+    </p>
+
+    <button id="actualizar">
+        Actualizar viviendas
+    </button>
+
+    <p id="estado" class="estado" role="status"></p>
+
+    <div id="lista" class="grid"></div>
+
+    <section id="detalle" class="panel" hidden>
+        <h2 id="tituloDetalle">Detalle</h2>
+
+        <div id="informacion"></div>
+
+        <h3>Reseñas registradas</h3>
+
+        <div id="resenas"></div>
+    </section>
+
+</main>
+
+<script>
+    const URL_API = "api/viviendas";
+
+    const lista = document.getElementById("lista");
+    const estado = document.getElementById("estado");
+    const panelDetalle = document.getElementById("detalle");
+
+    // Realiza solicitudes HTTP y convierte JSON.
+    async function consultarAPI(url) {
+
+        const respuesta = await fetch(url, {
+            headers: {
+                "Accept": "application/json"
+            }
+        });
+
+        const datos = await respuesta.json();
+
+        if (!respuesta.ok) {
+            throw new Error(
+                datos.error || "Error en el servicio REST"
+            );
+        }
+
+        return datos;
+    }
+
+    // Consulta todas las viviendas.
+    async function cargarViviendas() {
+
+        estado.textContent = "Cargando viviendas...";
+        lista.replaceChildren();
+        panelDetalle.hidden = true;
+
+        try {
+
+            const viviendas =
+                    await consultarAPI(URL_API);
+
+            if (viviendas.length === 0) {
+                estado.textContent =
+                        "No hay viviendas registradas.";
+                return;
+            }
+
+            viviendas.forEach(vivienda => {
+
+                const tarjeta =
+                        document.createElement("div");
+
+                tarjeta.className = "vivienda";
+
+                const titulo =
+                        document.createElement("h3");
+
+                titulo.textContent = vivienda.titulo;
+
+                const descripcion =
+                        document.createElement("p");
+
+                descripcion.textContent =
+                        vivienda.tipo + " | " +
+                        vivienda.zona + " | $" +
+                        Number(vivienda.precio).toFixed(2);
+
+                const boton =
+                        document.createElement("button");
+
+                boton.textContent =
+                        "Ver detalle y reseñas";
+
+                boton.addEventListener("click", () => {
+                    cargarDetalle(vivienda.id);
+                });
+
+                tarjeta.append(
+                    titulo, descripcion, boton
+                );
+
+                lista.appendChild(tarjeta);
+            });
+
+            estado.textContent =
+                    "Viviendas encontradas: " +
+                    viviendas.length;
+
+        } catch (error) {
+
+            estado.textContent =
+                    "No se pudo cargar la información: " +
+                    error.message;
+        }
+    }
+
+    // Consulta una vivienda y sus reseñas.
+    async function cargarDetalle(id) {
+
+        panelDetalle.hidden = false;
+
+        document.getElementById("tituloDetalle")
+                .textContent = "Cargando detalle...";
+
+        const informacion =
+                document.getElementById("informacion");
+
+        const contenedorResenas =
+                document.getElementById("resenas");
+
+        informacion.replaceChildren();
+        contenedorResenas.replaceChildren();
+
+        try {
+
+            const [vivienda, resenas] =
+                    await Promise.all([
+                        consultarAPI(URL_API + "/" + id),
+                        consultarAPI(
+                            URL_API + "/" + id + "/resenas"
+                        )
+                    ]);
+
+            document.getElementById("tituloDetalle")
+                    .textContent = vivienda.titulo;
+
+            const datos = document.createElement("p");
+
+            datos.textContent =
+                    "Dirección: " + vivienda.direccion +
+                    " | Zona: " + vivienda.zona +
+                    " | Habitaciones: " +
+                    vivienda.habitaciones +
+                    " | Precio: $" +
+                    Number(vivienda.precio).toFixed(2);
+
+            const descripcion =
+                    document.createElement("p");
+
+            descripcion.textContent =
+                    vivienda.descripcion || "Sin descripción.";
+
+            informacion.append(datos, descripcion);
+
+            if (resenas.length === 0) {
+                contenedorResenas.textContent =
+                        "Esta vivienda todavía no tiene reseñas.";
+            }
+
+            resenas.forEach(resena => {
+
+                const elemento =
+                        document.createElement("div");
+
+                elemento.className = "resena";
+
+                const autor =
+                        document.createElement("strong");
+
+                autor.textContent =
+                        resena.autor + " (" +
+                        resena.calificacion + "/5)";
+
+                const comentario =
+                        document.createElement("p");
+
+                comentario.textContent = resena.comentario;
+
+                elemento.append(autor, comentario);
+
+                contenedorResenas.appendChild(elemento);
+            });
+
+            panelDetalle.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+
+        } catch (error) {
+
+            document.getElementById("tituloDetalle")
+                    .textContent = "Error al consultar";
+
+            informacion.textContent = error.message;
+        }
+    }
+
+    document.getElementById("actualizar")
+            .addEventListener("click", cargarViviendas);
+
+    // Consultar automáticamente al abrir la página.
+    cargarViviendas();
+
+</script>
+
+</body>
+</html>

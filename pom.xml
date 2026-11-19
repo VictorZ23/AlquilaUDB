@@ -17,6 +17,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
+
+        <!-- Version de Jersey para la Fase III -->
+        <jersey.version>2.48</jersey.version>
     </properties>
 
     <dependencies>
@@ -36,14 +39,14 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- JSTL para las páginas JSP existentes -->
+        <!-- JSTL para las paginas JSP existentes -->
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>jstl</artifactId>
             <version>1.2</version>
         </dependency>
 
-        <!-- Implementación de JSF 2.3 -->
+        <!-- Implementacion de JSF 2.3 -->
         <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>javax.faces</artifactId>
@@ -57,11 +60,36 @@
             <version>3.1.9.Final</version>
         </dependency>
 
-        <!-- Hibernate ORM: implementación de JPA -->
+        <!-- Hibernate ORM: implementacion de JPA -->
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
             <version>5.6.15.Final</version>
+        </dependency>
+
+        <!-- ===================================== -->
+        <!-- FASE III: SERVICIOS REST CON JERSEY -->
+        <!-- ===================================== -->
+
+        <!-- Integracion de Jersey con Tomcat -->
+        <dependency>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <artifactId>jersey-container-servlet</artifactId>
+            <version>${jersey.version}</version>
+        </dependency>
+
+        <!-- Inyeccion de dependencias de Jersey -->
+        <dependency>
+            <groupId>org.glassfish.jersey.inject</groupId>
+            <artifactId>jersey-hk2</artifactId>
+            <version>${jersey.version}</version>
+        </dependency>
+
+        <!-- Serializacion y deserializacion JSON -->
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-json-jackson</artifactId>
+            <version>${jersey.version}</version>
         </dependency>
 
     </dependencies>
