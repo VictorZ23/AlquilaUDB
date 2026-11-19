@@ -12,8 +12,9 @@
             margin: 0;
             padding: 30px;
             font-family: "Segoe UI", Arial, sans-serif;
-            background: linear-gradient(135deg,
-                #f4f8ff, #dce7f5) fixed;
+            background: linear-gradient(
+                135deg, #f4f8ff, #dce7f5
+            ) fixed;
             color: #203b60;
         }
 
@@ -26,14 +27,17 @@
             color: #203b60;
         }
 
-        .panel {
+        .panel, .vivienda {
             background: white;
             padding: 24px;
-            margin: 20px 0;
             border-radius: 12px;
             border: 1px solid #cfdbeb;
             box-shadow: 0 5px 16px
                 rgba(31, 58, 93, 0.10);
+        }
+
+        .panel {
+            margin: 22px 0;
         }
 
         .grid {
@@ -41,39 +45,106 @@
             grid-template-columns:
                 repeat(auto-fit, minmax(270px, 1fr));
             gap: 16px;
+            margin-top: 20px;
         }
 
         .vivienda {
-            background: #fff;
             padding: 20px;
-            border-radius: 10px;
-            border: 1px solid #cfdbeb;
-            box-shadow: 0 3px 10px
-                rgba(31, 58, 93, 0.08);
+        }
+
+        .vivienda h3 {
+            margin-top: 0;
         }
 
         button {
-            padding: 10px 15px;
+            padding: 11px 16px;
             background: linear-gradient(
-                #345f90, #243f63);
+                #345f90, #243f63
+            );
             color: white;
-            border: none;
-            border-radius: 6px;
+            border: 1px solid #203b60;
+            border-radius: 7px;
             cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 3px 7px
+                rgba(25, 50, 80, 0.15);
         }
 
-        button:hover {
+        button:hover:not(:disabled) {
             background: #416e9f;
         }
 
-        .estado {
+        button:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
+        label {
+            display: block;
+            margin: 15px 0 6px;
+            font-weight: 600;
+        }
+
+        input, select, textarea {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #c5d2e2;
+            border-radius: 7px;
+            background: white;
+            font: inherit;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #527eaf;
+            box-shadow: 0 0 0 3px
+                rgba(82, 126, 175, 0.15);
+        }
+
+        textarea {
+            min-height: 110px;
+            resize: vertical;
+        }
+
+        .formulario {
+            max-width: 720px;
+            margin-top: 25px;
+            padding: 20px;
+            background: #f7faff;
+            border: 1px solid #d7e2ef;
+            border-radius: 10px;
+        }
+
+        .formulario button {
+            margin-top: 18px;
+        }
+
+        .estado, .mensaje {
             margin: 15px 0;
             font-weight: 600;
         }
 
+        .exito {
+            color: #17633b;
+        }
+
+        .error {
+            color: #b42332;
+        }
+
         .resena {
-            padding: 12px;
+            padding: 14px 0;
             border-bottom: 1px solid #dde5ef;
+        }
+
+        .resena p {
+            margin-bottom: 5px;
+        }
+
+        .fecha {
+            color: #63758b;
+            font-size: 0.85rem;
         }
 
         [hidden] {
@@ -89,11 +160,11 @@
     <h1>AlquilaUDB - Cliente REST</h1>
 
     <p>
-        Consulta de viviendas y reseñas utilizando
-        JavaScript, HTTP y JSON.
+        Cliente desarrollado con HTML y JavaScript
+        para consumir los servicios REST de AlquilaUDB.
     </p>
 
-    <button id="actualizar">
+    <button id="actualizar" type="button">
         Actualizar viviendas
     </button>
 
@@ -102,87 +173,173 @@
     <div id="lista" class="grid"></div>
 
     <section id="detalle" class="panel" hidden>
-        <h2 id="tituloDetalle">Detalle</h2>
+
+        <h2 id="tituloDetalle">Detalle de vivienda</h2>
 
         <div id="informacion"></div>
 
         <h3>Reseñas registradas</h3>
 
         <div id="resenas"></div>
+
+        <form id="formularioResena"
+              class="formulario" hidden>
+
+            <h3>Escribir una reseña</h3>
+
+            <label for="autor">
+                Nombre:
+            </label>
+            <input type="text"
+                   id="autor"
+                   name="autor"
+                   minlength="2"
+                   maxlength="100"
+                   required>
+
+            <label for="calificacion">
+                Calificación:
+            </label>
+            <select id="calificacion"
+                    name="calificacion"
+                    required>
+                <option value="">
+                    Selecciona una opción
+                </option>
+                <option value="1">1 - Muy mala</option>
+                <option value="2">2 - Mala</option>
+                <option value="3">3 - Regular</option>
+                <option value="4">4 - Buena</option>
+                <option value="5">5 - Excelente</option>
+            </select>
+
+            <label for="comentario">
+                Comentario:
+            </label>
+            <textarea id="comentario"
+                      name="comentario"
+                      minlength="10"
+                      maxlength="1000"
+                      required></textarea>
+
+            <button type="submit" id="publicar">
+                Publicar reseña
+            </button>
+
+            <p id="mensajeFormulario"
+               class="mensaje"
+               role="status"
+               aria-live="polite"></p>
+
+        </form>
+
     </section>
 
 </main>
 
 <script>
+    "use strict";
+
     const URL_API = "api/viviendas";
 
-    const lista = document.getElementById("lista");
-    const estado = document.getElementById("estado");
-    const panelDetalle = document.getElementById("detalle");
+    const lista =
+        document.getElementById("lista");
 
-    // Realiza solicitudes HTTP y convierte JSON.
-    async function consultarAPI(url) {
+    const estado =
+        document.getElementById("estado");
+
+    const panelDetalle =
+        document.getElementById("detalle");
+
+    const formulario =
+        document.getElementById("formularioResena");
+
+    const mensajeFormulario =
+        document.getElementById("mensajeFormulario");
+
+    const botonPublicar =
+        document.getElementById("publicar");
+
+    let viviendaSeleccionada = null;
+
+    // ======================================
+    // CONSUMO DE SERVICIOS REST
+    // ======================================
+
+    async function solicitarJSON(url, opciones = {}) {
 
         const respuesta = await fetch(url, {
+            ...opciones,
             headers: {
-                "Accept": "application/json"
+                "Accept": "application/json",
+                ...(opciones.headers || {})
             }
         });
 
-        const datos = await respuesta.json();
+        const datos = await respuesta.json()
+                .catch(() => ({}));
 
         if (!respuesta.ok) {
             throw new Error(
-                datos.error || "Error en el servicio REST"
+                datos.error ||
+                "Error HTTP " + respuesta.status
             );
         }
 
         return datos;
     }
 
-    // Consulta todas las viviendas.
+    // ======================================
+    // LISTADO DE VIVIENDAS
+    // ======================================
+
     async function cargarViviendas() {
 
-        estado.textContent = "Cargando viviendas...";
+        estado.textContent =
+            "Cargando viviendas...";
+
         lista.replaceChildren();
+
         panelDetalle.hidden = true;
+        viviendaSeleccionada = null;
 
         try {
 
             const viviendas =
-                    await consultarAPI(URL_API);
+                await solicitarJSON(URL_API);
 
             if (viviendas.length === 0) {
                 estado.textContent =
-                        "No hay viviendas registradas.";
+                    "No hay viviendas registradas.";
                 return;
             }
 
             viviendas.forEach(vivienda => {
 
                 const tarjeta =
-                        document.createElement("div");
+                    document.createElement("div");
 
                 tarjeta.className = "vivienda";
 
                 const titulo =
-                        document.createElement("h3");
+                    document.createElement("h3");
 
                 titulo.textContent = vivienda.titulo;
 
                 const descripcion =
-                        document.createElement("p");
+                    document.createElement("p");
 
                 descripcion.textContent =
-                        vivienda.tipo + " | " +
-                        vivienda.zona + " | $" +
-                        Number(vivienda.precio).toFixed(2);
+                    vivienda.tipo + " | " +
+                    vivienda.zona + " | $" +
+                    Number(vivienda.precio).toFixed(2);
 
                 const boton =
-                        document.createElement("button");
+                    document.createElement("button");
 
+                boton.type = "button";
                 boton.textContent =
-                        "Ver detalle y reseñas";
+                    "Ver detalle y reseñas";
 
                 boton.addEventListener("click", () => {
                     cargarDetalle(vivienda.id);
@@ -196,30 +353,43 @@
             });
 
             estado.textContent =
-                    "Viviendas encontradas: " +
-                    viviendas.length;
+                "Viviendas encontradas: " +
+                viviendas.length;
 
         } catch (error) {
 
             estado.textContent =
-                    "No se pudo cargar la información: " +
-                    error.message;
+                "No se pudieron cargar las viviendas: " +
+                error.message;
+
+            estado.className = "estado error";
+            return;
         }
+
+        estado.className = "estado";
     }
 
-    // Consulta una vivienda y sus reseñas.
+    // ======================================
+    // DETALLE Y RESEÑAS
+    // ======================================
+
     async function cargarDetalle(id) {
 
-        panelDetalle.hidden = false;
+        viviendaSeleccionada = id;
 
-        document.getElementById("tituloDetalle")
-                .textContent = "Cargando detalle...";
+        panelDetalle.hidden = false;
+        formulario.hidden = true;
+
+        const titulo =
+            document.getElementById("tituloDetalle");
 
         const informacion =
-                document.getElementById("informacion");
+            document.getElementById("informacion");
 
         const contenedorResenas =
-                document.getElementById("resenas");
+            document.getElementById("resenas");
+
+        titulo.textContent = "Cargando detalle...";
 
         informacion.replaceChildren();
         contenedorResenas.replaceChildren();
@@ -227,81 +397,233 @@
         try {
 
             const [vivienda, resenas] =
-                    await Promise.all([
-                        consultarAPI(URL_API + "/" + id),
-                        consultarAPI(
-                            URL_API + "/" + id + "/resenas"
-                        )
-                    ]);
+                await Promise.all([
+                    solicitarJSON(URL_API + "/" + id),
+                    solicitarJSON(
+                        URL_API + "/" + id + "/resenas"
+                    )
+                ]);
 
-            document.getElementById("tituloDetalle")
-                    .textContent = vivienda.titulo;
+            // Evitar mostrar una consulta anterior
+            // si el usuario seleccionó otra vivienda.
+            if (viviendaSeleccionada !== id) {
+                return;
+            }
 
-            const datos = document.createElement("p");
+            titulo.textContent = vivienda.titulo;
+
+            const datos =
+                document.createElement("p");
 
             datos.textContent =
-                    "Dirección: " + vivienda.direccion +
-                    " | Zona: " + vivienda.zona +
-                    " | Habitaciones: " +
-                    vivienda.habitaciones +
-                    " | Precio: $" +
-                    Number(vivienda.precio).toFixed(2);
+                "Dirección: " + vivienda.direccion +
+                " | Zona: " + vivienda.zona +
+                " | Habitaciones: " +
+                vivienda.habitaciones +
+                " | Precio: $" +
+                Number(vivienda.precio).toFixed(2);
 
             const descripcion =
-                    document.createElement("p");
+                document.createElement("p");
 
             descripcion.textContent =
-                    vivienda.descripcion || "Sin descripción.";
+                vivienda.descripcion ||
+                "Sin descripción.";
 
             informacion.append(datos, descripcion);
 
             if (resenas.length === 0) {
                 contenedorResenas.textContent =
-                        "Esta vivienda todavía no tiene reseñas.";
+                    "Esta vivienda todavía no tiene reseñas.";
             }
 
             resenas.forEach(resena => {
 
                 const elemento =
-                        document.createElement("div");
+                    document.createElement("div");
 
                 elemento.className = "resena";
 
                 const autor =
-                        document.createElement("strong");
+                    document.createElement("strong");
 
                 autor.textContent =
-                        resena.autor + " (" +
-                        resena.calificacion + "/5)";
+                    resena.autor + " (" +
+                    resena.calificacion + "/5)";
 
                 const comentario =
-                        document.createElement("p");
+                    document.createElement("p");
 
-                comentario.textContent = resena.comentario;
+                comentario.textContent =
+                    resena.comentario;
 
-                elemento.append(autor, comentario);
+                const fecha =
+                    document.createElement("span");
+
+                fecha.className = "fecha";
+
+                fecha.textContent =
+                    resena.fecha
+                        ? "Fecha: " + resena.fecha
+                        : "Fecha no disponible";
+
+                elemento.append(
+                    autor, comentario, fecha
+                );
 
                 contenedorResenas.appendChild(elemento);
             });
 
-            panelDetalle.scrollIntoView({
-                behavior: "smooth",
-                block: "start"
-            });
+            formulario.hidden = false;
 
         } catch (error) {
 
-            document.getElementById("tituloDetalle")
-                    .textContent = "Error al consultar";
+            if (viviendaSeleccionada !== id) {
+                return;
+            }
+
+            titulo.textContent =
+                "Error al consultar la vivienda";
 
             informacion.textContent = error.message;
         }
     }
 
-    document.getElementById("actualizar")
-            .addEventListener("click", cargarViviendas);
+    // ======================================
+    // REGISTRO DE RESEÑAS MEDIANTE POST
+    // ======================================
 
-    // Consultar automáticamente al abrir la página.
+    async function publicarResena(evento) {
+
+        evento.preventDefault();
+
+        if (viviendaSeleccionada === null) {
+            return;
+        }
+
+        const id = viviendaSeleccionada;
+
+        const autor =
+            document.getElementById("autor")
+                .value.trim();
+
+        const calificacion =
+            Number(
+                document.getElementById("calificacion")
+                    .value
+            );
+
+        const comentario =
+            document.getElementById("comentario")
+                .value.trim();
+
+        // Validaciones adicionales del cliente.
+        // La API REST valida nuevamente los datos.
+
+        if (autor.length < 2 ||
+                autor.length > 100) {
+
+            mostrarMensaje(
+                "El nombre debe tener entre 2 y 100 caracteres.",
+                false
+            );
+            return;
+        }
+
+        if (!Number.isInteger(calificacion) ||
+                calificacion < 1 ||
+                calificacion > 5) {
+
+            mostrarMensaje(
+                "Selecciona una calificación entre 1 y 5.",
+                false
+            );
+            return;
+        }
+
+        if (comentario.length < 10 ||
+                comentario.length > 1000) {
+
+            mostrarMensaje(
+                "El comentario debe tener entre 10 y 1000 caracteres.",
+                false
+            );
+            return;
+        }
+
+        botonPublicar.disabled = true;
+
+        mensajeFormulario.className = "mensaje";
+        mensajeFormulario.textContent =
+            "Publicando reseña...";
+
+        try {
+
+            const nuevaResena = {
+                autor: autor,
+                calificacion: calificacion,
+                comentario: comentario
+            };
+
+            await solicitarJSON(
+                URL_API + "/" + id + "/resenas",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(nuevaResena)
+                }
+            );
+
+            formulario.reset();
+
+            // Consultar nuevamente la base de datos
+            // para visualizar la reseña registrada.
+            await cargarDetalle(id);
+
+            mostrarMensaje(
+                "La reseña se registró correctamente.",
+                true
+            );
+
+        } catch (error) {
+
+            mostrarMensaje(
+                "No se pudo publicar la reseña: " +
+                error.message,
+                false
+            );
+
+        } finally {
+
+            botonPublicar.disabled = false;
+        }
+    }
+
+    // Mostrar mensajes sin insertar HTML.
+    function mostrarMensaje(texto, correcto) {
+
+        mensajeFormulario.textContent = texto;
+
+        mensajeFormulario.className =
+            correcto
+                ? "mensaje exito"
+                : "mensaje error";
+    }
+
+    // ======================================
+    // EVENTOS
+    // ======================================
+
+    document.getElementById("actualizar")
+        .addEventListener("click", cargarViviendas);
+
+    formulario.addEventListener(
+        "submit", publicarResena
+    );
+
+    // Cargar viviendas al abrir la página.
     cargarViviendas();
 
 </script>
