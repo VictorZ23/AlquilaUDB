@@ -4,6 +4,7 @@ import com.alquilaudb.jpa.ViviendaJpaDAO;
 import com.alquilaudb.model.Vivienda;
 import com.alquilaudb.model.Resena;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,12 +18,17 @@ import javax.enterprise.inject.spi.CDI;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
+
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 @Path("viviendas")
 @Produces(MediaType.APPLICATION_JSON)
@@ -31,9 +37,9 @@ public class ViviendaResource {
     private static final Logger LOGGER =
             Logger.getLogger(ViviendaResource.class.getName());
 
-    // =========================================
+    // ==========================================
     // GET /api/viviendas
-    // =========================================
+    // ==========================================
 
     @GET
     public Response listarViviendas() {
@@ -54,8 +60,11 @@ public class ViviendaResource {
 
         } catch (Exception ex) {
 
-            LOGGER.log(Level.SEVERE,
-                    "Error al consultar viviendas", ex);
+            LOGGER.log(
+                    Level.SEVERE,
+                    "Error al consultar viviendas",
+                    ex
+            );
 
             return error(
                     Response.Status.INTERNAL_SERVER_ERROR,
@@ -64,9 +73,9 @@ public class ViviendaResource {
         }
     }
 
-    // =========================================
+    // ==========================================
     // GET /api/viviendas/{id}
-    // =========================================
+    // ==========================================
 
     @GET
     @Path("{id}")
@@ -78,7 +87,7 @@ public class ViviendaResource {
         if (id == null) {
             return error(
                     Response.Status.BAD_REQUEST,
-                    "El identificador debe ser un numero entero mayor que cero."
+                    "El identificador debe ser un entero mayor que cero."
             );
         }
 
@@ -100,8 +109,11 @@ public class ViviendaResource {
 
         } catch (Exception ex) {
 
-            LOGGER.log(Level.SEVERE,
-                    "Error al consultar vivienda ID " + id, ex);
+            LOGGER.log(
+                    Level.SEVERE,
+                    "Error al consultar vivienda " + id,
+                    ex
+            );
 
             return error(
                     Response.Status.INTERNAL_SERVER_ERROR,
@@ -110,9 +122,226 @@ public class ViviendaResource {
         }
     }
 
-    // =========================================
+    // ==========================================
+    // POST /api/viviendas
+    // ==========================================
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response registrarVivienda(
+            Map<String, Object> solicitud,
+            @Context UriInfo uriInfo) {
+
+        if (solicitud == null) {
+            return error(
+                    Response.Status.BAD_REQUEST,
+                    "Debe enviar los datos de la vivienda."
+            );
+        }
+
+        final Vivienda nueva;
+
+        try {
+            nueva = leerDatosVivienda(
+                    solicitud, false
+            );
+
+        } catch (IllegalArgumentException ex) {
+            return error(
+                    Response.Status.BAD_REQUEST,
+                    ex.getMessage()
+            );
+        }
+
+        try {
+            ViviendaJpaDAO dao = obtenerDAO();
+
+            dao.guardar(nueva);
+
+            java.net.URI ubicacion = uriInfo
+                    .getAbsolutePathBuilder()
+                    .path(String.valueOf(nueva.getId()))
+                    .build();
+
+            return Response
+                    .created(ubicacion)
+                    .entity(convertirVivienda(nueva))
+                    .build();
+
+        } catch (Exception ex) {
+
+            LOGGER.log(
+                    Level.SEVERE,
+                    "Error al registrar vivienda",
+                    ex
+            );
+
+            return error(
+                    Response.Status.INTERNAL_SERVER_ERROR,
+                    "No se pudo registrar la vivienda."
+            );
+        }
+    }
+
+    // ==========================================
+    // PUT /api/viviendas/{id}
+    // ==========================================
+
+    @PUT
+    @Path("{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response actualizarVivienda(
+            @PathParam("id") String idTexto,
+            Map<String, Object> solicitud) {
+
+        Integer id = validarId(idTexto);
+
+        if (id == null) {
+            return error(
+                    Response.Status.BAD_REQUEST,
+                    "El identificador debe ser un entero mayor que cero."
+            );
+        }
+
+        if (solicitud == null) {
+            return error(
+                    Response.Status.BAD_REQUEST,
+                    "Debe enviar los datos de la vivienda."
+            );
+        }
+
+        if (solicitud.containsKey("id")) {
+            return error(
+                    Response.Status.BAD_REQUEST,
+                    "El ID debe indicarse en la URL, no en el JSON."
+            );
+        }
+
+        final Vivienda datosNuevos;
+
+        try {
+            datosNuevos = leerDatosVivienda(
+                    solicitud, true
+            );
+
+        } catch (IllegalArgumentException ex) {
+            return error(
+                    Response.Status.BAD_REQUEST,
+                    ex.getMessage()
+            );
+        }
+
+        try {
+            ViviendaJpaDAO dao = obtenerDAO();
+
+            Vivienda existente = dao.buscarPorId(id);
+
+            if (existente == null) {
+                return error(
+                        Response.Status.NOT_FOUND,
+                        "No existe una vivienda con el ID indicado."
+                );
+            }
+
+            copiarDatos(datosNuevos, existente);
+
+            existente.setDisponible(
+                    (Boolean) solicitud.get("disponible")
+            );
+
+            dao.actualizar(existente);
+
+            Vivienda actualizada = dao.buscarPorId(id);
+
+            return Response.ok(
+                    convertirVivienda(actualizada)
+            ).build();
+
+        } catch (Exception ex) {
+
+            LOGGER.log(
+                    Level.SEVERE,
+                    "Error al actualizar vivienda " + id,
+                    ex
+            );
+
+            return error(
+                    Response.Status.INTERNAL_SERVER_ERROR,
+                    "No se pudo actualizar la vivienda."
+            );
+        }
+    }
+
+    // ==========================================
+    // DELETE /api/viviendas/{id}
+    // ==========================================
+
+    @DELETE
+    @Path("{id}")
+    public Response eliminarVivienda(
+            @PathParam("id") String idTexto) {
+
+        Integer id = validarId(idTexto);
+
+        if (id == null) {
+            return error(
+                    Response.Status.BAD_REQUEST,
+                    "El identificador debe ser un entero mayor que cero."
+            );
+        }
+
+        try {
+            ViviendaJpaDAO dao = obtenerDAO();
+
+            // Comprobar que exista la vivienda.
+            Vivienda vivienda = dao.buscarPorId(id);
+
+            if (vivienda == null) {
+                return error(
+                        Response.Status.NOT_FOUND,
+                        "No existe una vivienda con el ID indicado."
+                );
+            }
+
+            // El DAO comprueba si existen
+            // resenas y protege la integridad.
+            dao.eliminar(id);
+
+            // Eliminacion correcta.
+            // HTTP 204 no devuelve cuerpo.
+            return Response.noContent().build();
+
+        } catch (IllegalStateException ex) {
+
+            LOGGER.log(
+                    Level.INFO,
+                    "Eliminacion rechazada por regla de negocio",
+                    ex
+            );
+
+            return error(
+                    Response.Status.CONFLICT,
+                    "No se puede eliminar esta vivienda porque tiene resenas asociadas."
+            );
+
+        } catch (Exception ex) {
+
+            LOGGER.log(
+                    Level.SEVERE,
+                    "Error al eliminar vivienda " + id,
+                    ex
+            );
+
+            return error(
+                    Response.Status.INTERNAL_SERVER_ERROR,
+                    "No se pudo eliminar la vivienda."
+            );
+        }
+    }
+
+    // ==========================================
     // GET /api/viviendas/{id}/resenas
-    // =========================================
+    // ==========================================
 
     @GET
     @Path("{id}/resenas")
@@ -124,23 +353,22 @@ public class ViviendaResource {
         if (id == null) {
             return error(
                     Response.Status.BAD_REQUEST,
-                    "El identificador debe ser un numero entero mayor que cero."
+                    "El identificador debe ser un entero mayor que cero."
             );
         }
 
         try {
             ViviendaJpaDAO dao = obtenerDAO();
 
-            Vivienda vivienda = dao.buscarPorId(id);
-
-            if (vivienda == null) {
+            if (dao.buscarPorId(id) == null) {
                 return error(
                         Response.Status.NOT_FOUND,
                         "No existe una vivienda con el ID indicado."
                 );
             }
 
-            List<Resena> resenas = dao.listarResenas(id);
+            List<Resena> resenas =
+                    dao.listarResenas(id);
 
             List<Map<String, Object>> resultado =
                     new ArrayList<>();
@@ -153,9 +381,11 @@ public class ViviendaResource {
 
         } catch (Exception ex) {
 
-            LOGGER.log(Level.SEVERE,
-                    "Error al consultar resenas de vivienda ID "
-                    + id, ex);
+            LOGGER.log(
+                    Level.SEVERE,
+                    "Error al consultar resenas",
+                    ex
+            );
 
             return error(
                     Response.Status.INTERNAL_SERVER_ERROR,
@@ -164,10 +394,9 @@ public class ViviendaResource {
         }
     }
 
-    // =========================================
+    // ==========================================
     // POST /api/viviendas/{id}/resenas
-    // Registrar una nueva resena
-    // =========================================
+    // ==========================================
 
     @POST
     @Path("{id}/resenas")
@@ -181,11 +410,10 @@ public class ViviendaResource {
         if (id == null) {
             return error(
                     Response.Status.BAD_REQUEST,
-                    "El identificador debe ser un numero entero mayor que cero."
+                    "El identificador debe ser un entero mayor que cero."
             );
         }
 
-        // Validar que exista un objeto JSON.
         if (solicitud == null) {
             return error(
                     Response.Status.BAD_REQUEST,
@@ -195,33 +423,49 @@ public class ViviendaResource {
 
         Object autorValor = solicitud.get("autor");
         Object notaValor = solicitud.get("calificacion");
-        Object comentarioValor = solicitud.get("comentario");
+        Object comentarioValor =
+                solicitud.get("comentario");
 
-        // Comprobar tipos de datos.
         if (!(autorValor instanceof String)
-                || !(notaValor instanceof Integer)
+                || !(notaValor instanceof Number)
                 || !(comentarioValor instanceof String)) {
 
             return error(
                     Response.Status.BAD_REQUEST,
-                    "Debe enviar autor, calificacion entera y comentario validos."
+                    "Debe enviar autor, calificacion y comentario validos."
             );
         }
 
         String autor = ((String) autorValor).trim();
-        int calificacion = (Integer) notaValor;
+
         String comentario =
                 ((String) comentarioValor).trim();
 
-        // Validar el nombre del autor.
-        if (autor.length() < 2 || autor.length() > 100) {
+        int calificacion;
+
+        try {
+            calificacion = new BigDecimal(
+                    notaValor.toString()
+            ).intValueExact();
+
+        } catch (ArithmeticException
+                | NumberFormatException ex) {
+
+            return error(
+                    Response.Status.BAD_REQUEST,
+                    "La calificacion debe ser un numero entero."
+            );
+        }
+
+        if (autor.length() < 2
+                || autor.length() > 100) {
+
             return error(
                     Response.Status.BAD_REQUEST,
                     "El autor debe tener entre 2 y 100 caracteres."
             );
         }
 
-        // Validar la calificacion.
         if (calificacion < 1 || calificacion > 5) {
             return error(
                     Response.Status.BAD_REQUEST,
@@ -229,7 +473,6 @@ public class ViviendaResource {
             );
         }
 
-        // Validar el comentario.
         if (comentario.length() < 10
                 || comentario.length() > 1000) {
 
@@ -242,27 +485,21 @@ public class ViviendaResource {
         try {
             ViviendaJpaDAO dao = obtenerDAO();
 
-            // Verificar que la vivienda exista.
-            Vivienda vivienda = dao.buscarPorId(id);
-
-            if (vivienda == null) {
+            if (dao.buscarPorId(id) == null) {
                 return error(
                         Response.Status.NOT_FOUND,
                         "No existe una vivienda con el ID indicado."
                 );
             }
 
-            // Crear una entidad nueva.
             Resena nuevaResena = new Resena();
 
             nuevaResena.setAutor(autor);
             nuevaResena.setCalificacion(calificacion);
             nuevaResena.setComentario(comentario);
 
-            // Guardar mediante el DAO existente.
             dao.guardarResena(id, nuevaResena);
 
-            // Informar que el registro se creo.
             return Response
                     .status(Response.Status.CREATED)
                     .entity(convertirResena(nuevaResena))
@@ -277,9 +514,11 @@ public class ViviendaResource {
 
         } catch (Exception ex) {
 
-            LOGGER.log(Level.SEVERE,
-                    "Error al registrar resena para vivienda "
-                    + id, ex);
+            LOGGER.log(
+                    Level.SEVERE,
+                    "Error al registrar resena",
+                    ex
+            );
 
             return error(
                     Response.Status.INTERNAL_SERVER_ERROR,
@@ -288,9 +527,212 @@ public class ViviendaResource {
         }
     }
 
-    // =========================================
+    // ==========================================
+    // VALIDACIONES DE VIVIENDA
+    // ==========================================
+
+    private Vivienda leerDatosVivienda(
+            Map<String, Object> solicitud,
+            boolean exigirDisponibilidad) {
+
+        String titulo = obtenerTexto(
+                solicitud, "titulo", 3, 100);
+
+        String tipo = obtenerTexto(
+                solicitud, "tipo", 2, 30);
+
+        String direccion = obtenerTexto(
+                solicitud, "direccion", 5, 150);
+
+        String zona = obtenerTexto(
+                solicitud, "zona", 2, 100);
+
+        double precio = obtenerPrecio(solicitud);
+
+        int habitaciones =
+                obtenerHabitaciones(solicitud);
+
+        String descripcion = "";
+
+        if (solicitud.containsKey("descripcion")) {
+
+            Object valor = solicitud.get("descripcion");
+
+            if (valor != null
+                    && !(valor instanceof String)) {
+
+                throw new IllegalArgumentException(
+                        "La descripcion debe ser texto."
+                );
+            }
+
+            if (valor != null) {
+                descripcion = ((String) valor).trim();
+            }
+
+            if (descripcion.length() > 3000) {
+                throw new IllegalArgumentException(
+                        "La descripcion no debe superar 3000 caracteres."
+                );
+            }
+        }
+
+        boolean disponible = true;
+
+        if (solicitud.containsKey("disponible")) {
+
+            Object valor = solicitud.get("disponible");
+
+            if (!(valor instanceof Boolean)) {
+                throw new IllegalArgumentException(
+                        "La disponibilidad debe ser true o false."
+                );
+            }
+
+            disponible = (Boolean) valor;
+
+        } else if (exigirDisponibilidad) {
+
+            throw new IllegalArgumentException(
+                    "Debe indicar la disponibilidad de la vivienda."
+            );
+        }
+
+        Vivienda vivienda = new Vivienda();
+
+        vivienda.setTitulo(titulo);
+        vivienda.setTipo(tipo);
+        vivienda.setDireccion(direccion);
+        vivienda.setZona(zona);
+        vivienda.setPrecio(precio);
+        vivienda.setHabitaciones(habitaciones);
+        vivienda.setDescripcion(descripcion);
+        vivienda.setDisponible(disponible);
+
+        return vivienda;
+    }
+
+    private void copiarDatos(
+            Vivienda origen,
+            Vivienda destino) {
+
+        destino.setTitulo(origen.getTitulo());
+        destino.setTipo(origen.getTipo());
+        destino.setDireccion(origen.getDireccion());
+        destino.setZona(origen.getZona());
+        destino.setPrecio(origen.getPrecio());
+        destino.setHabitaciones(origen.getHabitaciones());
+        destino.setDescripcion(origen.getDescripcion());
+    }
+
+    private String obtenerTexto(
+            Map<String, Object> solicitud,
+            String campo,
+            int minimo,
+            int maximo) {
+
+        Object valor = solicitud.get(campo);
+
+        if (!(valor instanceof String)) {
+            throw new IllegalArgumentException(
+                    "El campo " + campo
+                    + " debe contener texto."
+            );
+        }
+
+        String texto = ((String) valor).trim();
+
+        if (texto.length() < minimo
+                || texto.length() > maximo) {
+
+            throw new IllegalArgumentException(
+                    "El campo " + campo
+                    + " debe tener entre "
+                    + minimo + " y "
+                    + maximo + " caracteres."
+            );
+        }
+
+        return texto;
+    }
+
+    private double obtenerPrecio(
+            Map<String, Object> solicitud) {
+
+        Object valor = solicitud.get("precio");
+
+        if (!(valor instanceof Number)) {
+            throw new IllegalArgumentException(
+                    "El precio debe ser numerico."
+            );
+        }
+
+        BigDecimal precio;
+
+        try {
+            precio = new BigDecimal(valor.toString());
+
+        } catch (NumberFormatException ex) {
+
+            throw new IllegalArgumentException(
+                    "El precio no es valido."
+            );
+        }
+
+        if (precio.compareTo(BigDecimal.ZERO) <= 0
+                || precio.compareTo(
+                        new BigDecimal("99999999.99")) > 0
+                || precio.scale() > 2) {
+
+            throw new IllegalArgumentException(
+                    "El precio debe ser positivo, "
+                    + "tener como maximo dos decimales "
+                    + "y no superar 99999999.99."
+            );
+        }
+
+        return precio.doubleValue();
+    }
+
+    private int obtenerHabitaciones(
+            Map<String, Object> solicitud) {
+
+        Object valor = solicitud.get("habitaciones");
+
+        if (!(valor instanceof Number)) {
+            throw new IllegalArgumentException(
+                    "Las habitaciones deben ser un numero."
+            );
+        }
+
+        int habitaciones;
+
+        try {
+            habitaciones = new BigDecimal(
+                    valor.toString()
+            ).intValueExact();
+
+        } catch (ArithmeticException
+                | NumberFormatException ex) {
+
+            throw new IllegalArgumentException(
+                    "Las habitaciones deben ser un entero."
+            );
+        }
+
+        if (habitaciones < 1 || habitaciones > 100) {
+
+            throw new IllegalArgumentException(
+                    "Las habitaciones deben estar entre 1 y 100."
+            );
+        }
+
+        return habitaciones;
+    }
+
+    // ==========================================
     // METODOS AUXILIARES
-    // =========================================
+    // ==========================================
 
     private ViviendaJpaDAO obtenerDAO() {
 
@@ -299,20 +741,15 @@ public class ViviendaResource {
                 .get();
     }
 
-    private Integer validarId(String idTexto) {
+    private Integer validarId(String texto) {
 
         try {
-            int id = Integer.parseInt(idTexto);
-
-            if (id > 0) {
-                return id;
-            }
+            int id = Integer.parseInt(texto);
+            return id > 0 ? id : null;
 
         } catch (NumberFormatException ex) {
-            // Identificador invalido.
+            return null;
         }
-
-        return null;
     }
 
     private Map<String, Object> convertirVivienda(
