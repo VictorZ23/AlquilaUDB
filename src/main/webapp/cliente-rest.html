@@ -2,287 +2,749 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AlquilaUDB - Cliente REST</title>
 
     <style>
+        :root {
+            font-family: Arial, Helvetica, sans-serif;
+            color-scheme: light;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
-            padding: 30px;
-            font-family: "Segoe UI", Arial, sans-serif;
-            background: linear-gradient(
-                135deg, #f4f8ff, #dce7f5
-            ) fixed;
-            color: #203b60;
+            color: #233e66;
+            background: linear-gradient(130deg, #eef3fb, #e1eaf8);
+            min-height: 100vh;
         }
 
-        main {
-            max-width: 1100px;
-            margin: auto;
+        .contenedor {
+            max-width: 1150px;
+            margin: 0 auto;
+            padding: 42px 22px 70px;
         }
 
-        h1, h2, h3 {
-            color: #203b60;
+        h1 {
+            font-size: 32px;
+            margin: 0 0 22px;
         }
 
-        .panel, .vivienda {
-            background: white;
-            padding: 24px;
-            border-radius: 12px;
-            border: 1px solid #cfdbeb;
-            box-shadow: 0 5px 16px
-                rgba(31, 58, 93, 0.10);
+        h2 {
+            font-size: 24px;
+            margin-top: 0;
         }
 
-        .panel {
-            margin: 22px 0;
+        h3 {
+            font-size: 19px;
+            line-height: 1.3;
+            margin-top: 0;
         }
 
-        .grid {
+        p {
+            line-height: 1.55;
+        }
+
+        .subtitulo {
+            margin-bottom: 20px;
+        }
+
+        .acciones {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        button {
+            background: linear-gradient(#3c6397, #203d62);
+            border: 1px solid #294b75;
+            border-radius: 6px;
+            color: white;
+            padding: 11px 16px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 3px 7px #1d385227;
+        }
+
+        button:hover {
+            filter: brightness(1.12);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible {
+            outline: 3px solid #679bd4;
+            outline-offset: 2px;
+        }
+
+        .secundario {
+            background: #f4f7fc;
+            color: #203d62;
+            border-color: #9bb2d0;
+        }
+
+        .peligro {
+            background: linear-gradient(#ad4552, #812936);
+            border-color: #812936;
+        }
+
+        .pequeno {
+            padding: 9px 12px;
+            font-size: 13px;
+        }
+
+        .rejilla {
             display: grid;
-            grid-template-columns:
-                repeat(auto-fit, minmax(270px, 1fr));
+            grid-template-columns: repeat(
+                auto-fit, minmax(270px, 1fr)
+            );
             gap: 16px;
             margin-top: 20px;
         }
 
-        .vivienda {
+        .tarjeta,
+        .panel {
+            background: #fff;
+            border: 1px solid #cbd9ec;
+            border-radius: 12px;
+            box-shadow: 0 5px 16px #223d5814;
+        }
+
+        .tarjeta {
+            padding: 21px;
+            min-height: 190px;
+        }
+
+        .tarjeta p {
+            margin: 14px 0;
+        }
+
+        .botones-tarjeta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .panel {
+            padding: 26px;
+            margin: 28px 0;
+        }
+
+        .panel-interno {
+            background: #f4f7fd;
+            border: 1px solid #d1deee;
+            border-radius: 10px;
             padding: 20px;
+            margin-top: 22px;
         }
 
-        .vivienda h3 {
-            margin-top: 0;
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
         }
 
-        button {
-            padding: 11px 16px;
-            background: linear-gradient(
-                #345f90, #243f63
-            );
-            color: white;
-            border: 1px solid #203b60;
-            border-radius: 7px;
-            cursor: pointer;
-            font-weight: 600;
-            box-shadow: 0 3px 7px
-                rgba(25, 50, 80, 0.15);
+        .campo {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
         }
 
-        button:hover:not(:disabled) {
-            background: #416e9f;
-        }
-
-        button:disabled {
-            opacity: 0.65;
-            cursor: not-allowed;
+        .campo.ancho {
+            grid-column: 1 / -1;
         }
 
         label {
-            display: block;
-            margin: 15px 0 6px;
-            font-weight: 600;
+            font-weight: bold;
         }
 
-        input, select, textarea {
-            box-sizing: border-box;
+        input,
+        select,
+        textarea {
             width: 100%;
-            padding: 11px;
-            border: 1px solid #c5d2e2;
+            min-height: 44px;
+            border: 1px solid #b8cce6;
             border-radius: 7px;
-            background: white;
+            padding: 10px 12px;
             font: inherit;
-        }
-
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: #527eaf;
-            box-shadow: 0 0 0 3px
-                rgba(82, 126, 175, 0.15);
+            color: #1d3556;
+            background: #fff;
         }
 
         textarea {
-            min-height: 110px;
+            min-height: 95px;
             resize: vertical;
         }
 
-        .formulario {
-            max-width: 720px;
-            margin-top: 25px;
-            padding: 20px;
-            background: #f7faff;
-            border: 1px solid #d7e2ef;
-            border-radius: 10px;
+        .ayuda {
+            color: #586c86;
+            font-size: 13px;
+            margin-top: 8px;
         }
 
-        .formulario button {
-            margin-top: 18px;
+        .estado {
+            margin: 13px 0;
+            border-radius: 7px;
+            padding: 11px 14px;
+            background: #edf3fb;
+            border: 1px solid #b7cce4;
         }
 
-        .estado, .mensaje {
-            margin: 15px 0;
-            font-weight: 600;
+        .estado:empty {
+            display: none;
         }
 
-        .exito {
-            color: #17633b;
+        .estado.error {
+            background: #fff0f1;
+            border-color: #e5b7bd;
+            color: #822e3a;
         }
 
-        .error {
-            color: #b42332;
+        .estado.exito {
+            background: #ebf7ee;
+            border-color: #afd6b9;
+            color: #245b36;
         }
 
         .resena {
             padding: 14px 0;
-            border-bottom: 1px solid #dde5ef;
+            border-bottom: 1px solid #dbe5f1;
         }
 
-        .resena p {
-            margin-bottom: 5px;
+        .resena:last-child {
+            border-bottom: none;
         }
 
-        .fecha {
-            color: #63758b;
-            font-size: 0.85rem;
+        .resena strong {
+            color: #193d6a;
         }
 
-        [hidden] {
+        .resena small {
+            display: block;
+            color: #687d99;
+            margin-top: 6px;
+        }
+
+        .oculto {
             display: none !important;
+        }
+
+        @media (max-width: 690px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .contenedor {
+                padding: 24px 12px;
+            }
+
+            h1 {
+                font-size: 27px;
+            }
+
+            .panel {
+                padding: 17px;
+            }
         }
     </style>
 </head>
 
 <body>
 
-<main>
+<main class="contenedor">
 
     <h1>AlquilaUDB - Cliente REST</h1>
 
-    <p>
+    <p class="subtitulo">
         Cliente desarrollado con HTML y JavaScript
         para consumir los servicios REST de AlquilaUDB.
     </p>
 
-    <button id="actualizar" type="button">
-        Actualizar viviendas
-    </button>
+    <!-- ================================== -->
+    <!-- CONTROLES GENERALES                -->
+    <!-- ================================== -->
 
-    <p id="estado" class="estado" role="status"></p>
+    <div class="acciones">
 
-    <div id="lista" class="grid"></div>
+        <button type="button" id="actualizar">
+            Actualizar viviendas
+        </button>
 
-    <section id="detalle" class="panel" hidden>
+        <button type="button"
+                id="alternar-admin"
+                class="secundario"
+                aria-expanded="false">
+            Administrar viviendas
+        </button>
 
-        <h2 id="tituloDetalle">Detalle de vivienda</h2>
+    </div>
 
-        <div id="informacion"></div>
+    <p id="contador" aria-live="polite"></p>
+
+    <div id="estado-listado"
+         class="estado"
+         role="status"
+         aria-live="polite"></div>
+
+    <!-- ================================== -->
+    <!-- ADMINISTRACION DE VIVIENDAS        -->
+    <!-- ================================== -->
+
+    <section id="administracion"
+             class="panel oculto"
+             aria-label="Administracion de viviendas">
+
+        <h2>Administración de viviendas</h2>
+
+        <p>
+            Agrega, modifica o elimina viviendas
+            utilizando los endpoints protegidos
+            de nuestra API REST.
+        </p>
+
+        <!-- CLAVE ADMINISTRATIVA -->
+
+        <div class="panel-interno">
+
+            <div class="campo">
+
+                <label for="clave">
+                    Clave administrativa (X-API-Key)
+                </label>
+
+                <input id="clave"
+                       type="password"
+                       autocomplete="off"
+                       spellcheck="false"
+                       placeholder="Introduce tu clave administrativa">
+
+            </div>
+
+            <p class="ayuda">
+                La clave se utiliza únicamente mientras
+                esta página está abierta. No se guarda en
+                el almacenamiento del navegador.
+                No utilices este cliente por HTTP
+                en Internet.
+            </p>
+
+            <button type="button"
+                    class="secundario pequeno"
+                    id="limpiar-clave">
+                Borrar clave
+            </button>
+
+        </div>
+
+        <!-- FORMULARIO DE VIVIENDA -->
+
+        <div class="panel-interno">
+
+            <h3 id="titulo-formulario">
+                Agregar vivienda
+            </h3>
+
+            <p id="ayuda-edicion" class="ayuda">
+                Completa los datos de la nueva vivienda.
+            </p>
+
+            <form id="formulario-vivienda">
+
+                <div class="form-grid">
+
+                    <div class="campo ancho">
+
+                        <label for="v-titulo">
+                            Título *
+                        </label>
+
+                        <input id="v-titulo"
+                               required
+                               minlength="3"
+                               maxlength="100">
+
+                    </div>
+
+                    <div class="campo">
+
+                        <label for="v-tipo">
+                            Tipo *
+                        </label>
+
+                        <input id="v-tipo"
+                               required
+                               minlength="2"
+                               maxlength="30"
+                               placeholder="Habitación, Casa, Apartamento...">
+
+                    </div>
+
+                    <div class="campo">
+
+                        <label for="v-zona">
+                            Zona *
+                        </label>
+
+                        <input id="v-zona"
+                               required
+                               minlength="2"
+                               maxlength="100">
+
+                    </div>
+
+                    <div class="campo ancho">
+
+                        <label for="v-direccion">
+                            Dirección *
+                        </label>
+
+                        <input id="v-direccion"
+                               required
+                               minlength="5"
+                               maxlength="150">
+
+                    </div>
+
+                    <div class="campo">
+
+                        <label for="v-precio">
+                            Precio (USD) *
+                        </label>
+
+                        <input id="v-precio"
+                               type="number"
+                               required
+                               min="0.01"
+                               max="99999999.99"
+                               step="0.01">
+
+                    </div>
+
+                    <div class="campo">
+
+                        <label for="v-habitaciones">
+                            Habitaciones *
+                        </label>
+
+                        <input id="v-habitaciones"
+                               type="number"
+                               required
+                               min="1"
+                               max="100"
+                               step="1">
+
+                    </div>
+
+                    <div class="campo ancho">
+
+                        <label for="v-descripcion">
+                            Descripción
+                        </label>
+
+                        <textarea id="v-descripcion"
+                                  maxlength="3000"></textarea>
+
+                    </div>
+
+                    <div class="campo">
+
+                        <label for="v-disponible">
+                            Disponibilidad *
+                        </label>
+
+                        <select id="v-disponible" required>
+
+                            <option value="true">
+                                Disponible
+                            </option>
+
+                            <option value="false">
+                                No disponible
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+                <p id="aviso-disponibilidad"
+                   class="ayuda"></p>
+
+                <div class="acciones"
+                     style="margin-top:18px">
+
+                    <button type="submit"
+                            id="guardar-vivienda">
+                        Registrar vivienda
+                    </button>
+
+                    <button type="button"
+                            id="nueva-vivienda"
+                            class="secundario">
+                        Nuevo registro / cancelar edición
+                    </button>
+
+                </div>
+
+                <div id="estado-admin"
+                     class="estado"
+                     role="status"
+                     aria-live="polite"></div>
+
+            </form>
+
+        </div>
+
+    </section>
+
+    <!-- ================================== -->
+    <!-- LISTADO DE VIVIENDAS               -->
+    <!-- ================================== -->
+
+    <section aria-label="Listado de viviendas">
+
+        <div id="viviendas" class="rejilla"></div>
+
+    </section>
+
+    <!-- ================================== -->
+    <!-- DETALLE Y RESENAS                  -->
+    <!-- ================================== -->
+
+    <section id="detalle"
+             class="panel oculto"
+             aria-label="Detalle de vivienda">
+
+        <h2 id="detalle-titulo"></h2>
+
+        <p id="detalle-datos"></p>
+
+        <p id="detalle-descripcion"></p>
+
+        <div id="estado-detalle"
+             class="estado"
+             role="status"
+             aria-live="polite"></div>
 
         <h3>Reseñas registradas</h3>
 
         <div id="resenas"></div>
 
-        <form id="formularioResena"
-              class="formulario" hidden>
+        <div class="panel-interno">
 
             <h3>Escribir una reseña</h3>
 
-            <label for="autor">
-                Nombre:
-            </label>
-            <input type="text"
-                   id="autor"
-                   name="autor"
-                   minlength="2"
-                   maxlength="100"
-                   required>
+            <form id="formulario-resena">
 
-            <label for="calificacion">
-                Calificación:
-            </label>
-            <select id="calificacion"
-                    name="calificacion"
-                    required>
-                <option value="">
-                    Selecciona una opción
-                </option>
-                <option value="1">1 - Muy mala</option>
-                <option value="2">2 - Mala</option>
-                <option value="3">3 - Regular</option>
-                <option value="4">4 - Buena</option>
-                <option value="5">5 - Excelente</option>
-            </select>
+                <div class="form-grid">
 
-            <label for="comentario">
-                Comentario:
-            </label>
-            <textarea id="comentario"
-                      name="comentario"
-                      minlength="10"
-                      maxlength="1000"
-                      required></textarea>
+                    <div class="campo ancho">
 
-            <button type="submit" id="publicar">
-                Publicar reseña
-            </button>
+                        <label for="r-autor">
+                            Nombre *
+                        </label>
 
-            <p id="mensajeFormulario"
-               class="mensaje"
-               role="status"
-               aria-live="polite"></p>
+                        <input id="r-autor"
+                               required
+                               minlength="2"
+                               maxlength="100">
 
-        </form>
+                    </div>
+
+                    <div class="campo">
+
+                        <label for="r-calificacion">
+                            Calificación *
+                        </label>
+
+                        <select id="r-calificacion" required>
+
+                            <option value="">
+                                Selecciona una opción
+                            </option>
+
+                            <option value="1">1 / 5</option>
+                            <option value="2">2 / 5</option>
+                            <option value="3">3 / 5</option>
+                            <option value="4">4 / 5</option>
+                            <option value="5">5 / 5</option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="campo ancho">
+
+                        <label for="r-comentario">
+                            Comentario *
+                        </label>
+
+                        <textarea id="r-comentario"
+                                  required
+                                  minlength="10"
+                                  maxlength="1000"></textarea>
+
+                    </div>
+
+                </div>
+
+                <div class="acciones"
+                     style="margin-top:18px">
+
+                    <button type="submit"
+                            id="guardar-resena">
+                        Publicar reseña
+                    </button>
+
+                    <button type="button"
+                            id="cerrar-detalle"
+                            class="secundario">
+                        Cerrar detalle
+                    </button>
+
+                </div>
+
+                <div id="estado-resena"
+                     class="estado"
+                     role="status"
+                     aria-live="polite"></div>
+
+            </form>
+
+        </div>
 
     </section>
 
 </main>
 
+<!-- ====================================== -->
+<!-- JAVASCRIPT                             -->
+<!-- ====================================== -->
+
 <script>
+(function () {
+
     "use strict";
 
-    const URL_API = "api/viviendas";
+    const BASE = "api/viviendas";
 
-    const lista =
-        document.getElementById("lista");
+    const el = id => document.getElementById(id);
 
-    const estado =
-        document.getElementById("estado");
+    const lista = el("viviendas");
 
-    const panelDetalle =
-        document.getElementById("detalle");
+    const panelAdmin = el("administracion");
 
-    const formulario =
-        document.getElementById("formularioResena");
+    const panelDetalle = el("detalle");
 
-    const mensajeFormulario =
-        document.getElementById("mensajeFormulario");
+    const clave = el("clave");
 
-    const botonPublicar =
-        document.getElementById("publicar");
+    const formularioVivienda =
+            el("formulario-vivienda");
+
+    const formularioResena =
+            el("formulario-resena");
+
+    let viviendaEnEdicion = null;
 
     let viviendaSeleccionada = null;
 
+    let peticionDetalle = 0;
+
     // ======================================
-    // CONSUMO DE SERVICIOS REST
+    // MENSAJES DE ESTADO
     // ======================================
 
-    async function solicitarJSON(url, opciones = {}) {
+    function estado(elemento, mensaje, tipo) {
 
-        const respuesta = await fetch(url, {
-            ...opciones,
-            headers: {
-                "Accept": "application/json",
-                ...(opciones.headers || {})
+        elemento.textContent = mensaje || "";
+
+        elemento.className =
+                "estado" + (tipo ? " " + tipo : "");
+    }
+
+    function mensajeError(error) {
+
+        if (error instanceof TypeError) {
+
+            return "No fue posible comunicarse con "
+                 + "el servidor. Comprueba que Tomcat "
+                 + "esté iniciado e inténtalo nuevamente.";
+        }
+
+        return error.message
+                || "Ocurrió un error inesperado.";
+    }
+
+    // ======================================
+    // PETICIONES HTTP
+    // ======================================
+
+    async function solicitar(url, opciones) {
+
+        const respuesta =
+                await fetch(url, opciones || {});
+
+        const texto = await respuesta.text();
+
+        let datos = null;
+
+        if (texto) {
+
+            try {
+                datos = JSON.parse(texto);
+
+            } catch (_) {
+                datos = null;
             }
-        });
-
-        const datos = await respuesta.json()
-                .catch(() => ({}));
+        }
 
         if (!respuesta.ok) {
+
+            let mensaje =
+                    datos && datos.error
+                    ? datos.error
+                    : "La solicitud no pudo completarse "
+                    + "(HTTP " + respuesta.status + ").";
+
+            if (respuesta.status === 401) {
+                mensaje += " Introduce la clave administrativa.";
+            }
+
+            if (respuesta.status === 403) {
+                mensaje += " Comprueba la clave administrativa.";
+            }
+
+            if (respuesta.status === 409) {
+                mensaje += " La vivienda no se puede eliminar "
+                        + "mientras tenga reseñas.";
+            }
+
+            if (respuesta.status === 503) {
+                mensaje += " Comprueba la configuración de Tomcat.";
+            }
+
+            throw new Error(mensaje);
+        }
+
+        if (respuesta.status !== 204
+                && texto
+                && datos === null) {
+
             throw new Error(
-                datos.error ||
-                "Error HTTP " + respuesta.status
+                    "El servidor devolvió una respuesta "
+                    + "que no es JSON válido."
             );
         }
 
@@ -290,342 +752,946 @@
     }
 
     // ======================================
-    // LISTADO DE VIVIENDAS
+    // CREAR ELEMENTOS SEGUROS
+    // ======================================
+
+    function textoSeguro(etiqueta, contenido, clase) {
+
+        const nodo =
+                document.createElement(etiqueta);
+
+        nodo.textContent =
+                contenido == null
+                ? ""
+                : String(contenido);
+
+        if (clase) {
+            nodo.className = clase;
+        }
+
+        return nodo;
+    }
+
+    function boton(etiqueta, accion, clase) {
+
+        const nodo =
+                document.createElement("button");
+
+        nodo.type = "button";
+
+        nodo.textContent = etiqueta;
+
+        if (clase) {
+            nodo.className = clase;
+        }
+
+        nodo.addEventListener("click", accion);
+
+        return nodo;
+    }
+
+    function precio(valor) {
+
+        const numero = Number(valor);
+
+        return Number.isFinite(numero)
+                ? new Intl.NumberFormat(
+                        "en-US",
+                        {
+                            style: "currency",
+                            currency: "USD"
+                        }
+                ).format(numero)
+                : "No indicado";
+    }
+
+    function apiVivienda(id) {
+
+        return BASE + "/"
+                + encodeURIComponent(String(id));
+    }
+
+    // ======================================
+    // MOSTRAR / OCULTAR ADMINISTRACION
+    // ======================================
+
+    function administracionVisible() {
+
+        return !panelAdmin.classList.contains("oculto");
+    }
+
+    function mostrarAdministracion() {
+
+        panelAdmin.classList.remove("oculto");
+
+        el("alternar-admin")
+                .setAttribute("aria-expanded", "true");
+
+        el("alternar-admin").textContent =
+                "Ocultar administración";
+    }
+
+    function ocultarAdministracion() {
+
+        panelAdmin.classList.add("oculto");
+
+        el("alternar-admin")
+                .setAttribute("aria-expanded", "false");
+
+        el("alternar-admin").textContent =
+                "Administrar viviendas";
+
+        clave.value = "";
+    }
+
+    // ======================================
+    // GET: LISTAR VIVIENDAS
     // ======================================
 
     async function cargarViviendas() {
 
-        estado.textContent =
-            "Cargando viviendas...";
-
-        lista.replaceChildren();
-
-        panelDetalle.hidden = true;
-        viviendaSeleccionada = null;
+        estado(
+                el("estado-listado"),
+                "Cargando viviendas..."
+        );
 
         try {
 
-            const viviendas =
-                await solicitarJSON(URL_API);
+            const viviendas = await solicitar(BASE);
 
-            if (viviendas.length === 0) {
-                estado.textContent =
-                    "No hay viviendas registradas.";
-                return;
+            if (!Array.isArray(viviendas)) {
+
+                throw new Error(
+                        "El servidor no devolvió "
+                        + "una lista de viviendas."
+                );
             }
 
-            viviendas.forEach(vivienda => {
+            lista.replaceChildren();
+
+            el("contador").textContent =
+                    "Viviendas encontradas: "
+                    + viviendas.length;
+
+            for (const v of viviendas) {
 
                 const tarjeta =
-                    document.createElement("div");
+                        document.createElement("article");
 
-                tarjeta.className = "vivienda";
+                tarjeta.className = "tarjeta";
 
-                const titulo =
-                    document.createElement("h3");
-
-                titulo.textContent = vivienda.titulo;
-
-                const descripcion =
-                    document.createElement("p");
-
-                descripcion.textContent =
-                    vivienda.tipo + " | " +
-                    vivienda.zona + " | $" +
-                    Number(vivienda.precio).toFixed(2);
-
-                const boton =
-                    document.createElement("button");
-
-                boton.type = "button";
-                boton.textContent =
-                    "Ver detalle y reseñas";
-
-                boton.addEventListener("click", () => {
-                    cargarDetalle(vivienda.id);
-                });
-
-                tarjeta.append(
-                    titulo, descripcion, boton
+                tarjeta.appendChild(
+                        textoSeguro("h3", v.titulo)
                 );
 
-                lista.appendChild(tarjeta);
-            });
+                tarjeta.appendChild(
+                        textoSeguro(
+                                "p",
+                                [
+                                    v.tipo,
+                                    v.zona,
+                                    precio(v.precio)
+                                ].join(" | ")
+                        )
+                );
 
-            estado.textContent =
-                "Viviendas encontradas: " +
-                viviendas.length;
+                const acciones =
+                        document.createElement("div");
+
+                acciones.className =
+                        "botones-tarjeta";
+
+                // Consultar detalle.
+                acciones.appendChild(
+                        boton(
+                                "Ver detalle y reseñas",
+                                () => verDetalle(v.id),
+                                "pequeno"
+                        )
+                );
+
+                // Botones administrativos.
+                if (administracionVisible()) {
+
+                    acciones.appendChild(
+                            boton(
+                                    "Editar",
+                                    () => prepararEdicion(v.id),
+                                    "secundario pequeno"
+                            )
+                    );
+
+                    acciones.appendChild(
+                            boton(
+                                    "Eliminar",
+                                    () => eliminarVivienda(
+                                            v.id,
+                                            v.titulo
+                                    ),
+                                    "peligro pequeno"
+                            )
+                    );
+                }
+
+                tarjeta.appendChild(acciones);
+
+                lista.appendChild(tarjeta);
+            }
+
+            if (viviendas.length === 0) {
+
+                lista.appendChild(
+                        textoSeguro(
+                                "p",
+                                "No hay viviendas registradas."
+                        )
+                );
+            }
+
+            estado(el("estado-listado"), "");
 
         } catch (error) {
 
-            estado.textContent =
-                "No se pudieron cargar las viviendas: " +
-                error.message;
+            lista.replaceChildren();
 
-            estado.className = "estado error";
-            return;
+            el("contador").textContent = "";
+
+            estado(
+                    el("estado-listado"),
+                    mensajeError(error),
+                    "error"
+            );
         }
-
-        estado.className = "estado";
     }
 
     // ======================================
-    // DETALLE Y RESEÑAS
+    // GET: DETALLE DE UNA VIVIENDA
     // ======================================
 
-    async function cargarDetalle(id) {
+    async function verDetalle(id) {
+
+        const solicitudActual =
+                ++peticionDetalle;
 
         viviendaSeleccionada = id;
 
-        panelDetalle.hidden = false;
-        formulario.hidden = true;
+        panelDetalle.classList.remove("oculto");
 
-        const titulo =
-            document.getElementById("tituloDetalle");
+        el("detalle-titulo").textContent =
+                "Detalle de vivienda";
 
-        const informacion =
-            document.getElementById("informacion");
+        el("detalle-datos").textContent = "";
 
-        const contenedorResenas =
-            document.getElementById("resenas");
+        el("detalle-descripcion").textContent = "";
 
-        titulo.textContent = "Cargando detalle...";
+        el("resenas").replaceChildren();
 
-        informacion.replaceChildren();
-        contenedorResenas.replaceChildren();
+        formularioResena.reset();
+
+        estado(el("estado-resena"), "");
+
+        estado(
+                el("estado-detalle"),
+                "Cargando información..."
+        );
+
+        panelDetalle.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
 
         try {
 
-            const [vivienda, resenas] =
-                await Promise.all([
-                    solicitarJSON(URL_API + "/" + id),
-                    solicitarJSON(
-                        URL_API + "/" + id + "/resenas"
-                    )
-                ]);
+            const v = await solicitar(
+                    apiVivienda(id)
+            );
 
-            // Evitar mostrar una consulta anterior
-            // si el usuario seleccionó otra vivienda.
-            if (viviendaSeleccionada !== id) {
+            if (solicitudActual !== peticionDetalle) {
                 return;
             }
 
-            titulo.textContent = vivienda.titulo;
+            el("detalle-titulo").textContent =
+                    v.titulo;
 
-            const datos =
-                document.createElement("p");
+            el("detalle-datos").textContent =
+                    "Dirección: " + v.direccion
+                    + " | Zona: " + v.zona
+                    + " | Habitaciones: " + v.habitaciones
+                    + " | Precio: " + precio(v.precio);
 
-            datos.textContent =
-                "Dirección: " + vivienda.direccion +
-                " | Zona: " + vivienda.zona +
-                " | Habitaciones: " +
-                vivienda.habitaciones +
-                " | Precio: $" +
-                Number(vivienda.precio).toFixed(2);
+            el("detalle-descripcion").textContent =
+                    v.descripcion || "Sin descripción.";
 
-            const descripcion =
-                document.createElement("p");
+            estado(el("estado-detalle"), "");
 
-            descripcion.textContent =
-                vivienda.descripcion ||
-                "Sin descripción.";
-
-            informacion.append(datos, descripcion);
-
-            if (resenas.length === 0) {
-                contenedorResenas.textContent =
-                    "Esta vivienda todavía no tiene reseñas.";
-            }
-
-            resenas.forEach(resena => {
-
-                const elemento =
-                    document.createElement("div");
-
-                elemento.className = "resena";
-
-                const autor =
-                    document.createElement("strong");
-
-                autor.textContent =
-                    resena.autor + " (" +
-                    resena.calificacion + "/5)";
-
-                const comentario =
-                    document.createElement("p");
-
-                comentario.textContent =
-                    resena.comentario;
-
-                const fecha =
-                    document.createElement("span");
-
-                fecha.className = "fecha";
-
-                fecha.textContent =
-                    resena.fecha
-                        ? "Fecha: " + resena.fecha
-                        : "Fecha no disponible";
-
-                elemento.append(
-                    autor, comentario, fecha
-                );
-
-                contenedorResenas.appendChild(elemento);
-            });
-
-            formulario.hidden = false;
+            await cargarResenas(
+                    id,
+                    solicitudActual
+            );
 
         } catch (error) {
 
-            if (viviendaSeleccionada !== id) {
-                return;
+            if (solicitudActual === peticionDetalle) {
+
+                estado(
+                        el("estado-detalle"),
+                        mensajeError(error),
+                        "error"
+                );
             }
-
-            titulo.textContent =
-                "Error al consultar la vivienda";
-
-            informacion.textContent = error.message;
         }
     }
 
     // ======================================
-    // REGISTRO DE RESEÑAS MEDIANTE POST
+    // GET: LISTAR RESENAS
+    // ======================================
+
+    async function cargarResenas(id, solicitudActual) {
+
+        const contenedor = el("resenas");
+
+        contenedor.replaceChildren(
+                textoSeguro("p", "Cargando reseñas...")
+        );
+
+        try {
+
+            const resenas = await solicitar(
+                    apiVivienda(id) + "/resenas"
+            );
+
+            if (solicitudActual !== peticionDetalle
+                    || viviendaSeleccionada !== id) {
+                return;
+            }
+
+            contenedor.replaceChildren();
+
+            if (!Array.isArray(resenas)
+                    || resenas.length === 0) {
+
+                contenedor.appendChild(
+                        textoSeguro(
+                                "p",
+                                "Todavía no hay reseñas "
+                                + "para esta vivienda."
+                        )
+                );
+
+                return;
+            }
+
+            for (const r of resenas) {
+
+                const bloque =
+                        document.createElement("div");
+
+                bloque.className = "resena";
+
+                bloque.appendChild(
+                        textoSeguro(
+                                "strong",
+                                r.autor
+                                + " ("
+                                + r.calificacion
+                                + "/5)"
+                        )
+                );
+
+                bloque.appendChild(
+                        textoSeguro(
+                                "p",
+                                r.comentario
+                        )
+                );
+
+                if (r.fecha) {
+
+                    bloque.appendChild(
+                            textoSeguro(
+                                    "small",
+                                    "Fecha: " + r.fecha
+                            )
+                    );
+                }
+
+                contenedor.appendChild(bloque);
+            }
+
+        } catch (error) {
+
+            if (solicitudActual === peticionDetalle) {
+
+                contenedor.replaceChildren(
+                        textoSeguro(
+                                "p",
+                                mensajeError(error)
+                        )
+                );
+            }
+        }
+    }
+
+    // ======================================
+    // POST: PUBLICAR RESENA
     // ======================================
 
     async function publicarResena(evento) {
 
         evento.preventDefault();
 
-        if (viviendaSeleccionada === null) {
+        if (viviendaSeleccionada == null
+                || !formularioResena.reportValidity()) {
             return;
         }
 
         const id = viviendaSeleccionada;
 
-        const autor =
-            document.getElementById("autor")
-                .value.trim();
+        const enviar = el("guardar-resena");
 
-        const calificacion =
-            Number(
-                document.getElementById("calificacion")
-                    .value
-            );
+        enviar.disabled = true;
 
-        const comentario =
-            document.getElementById("comentario")
-                .value.trim();
-
-        // Validaciones adicionales del cliente.
-        // La API REST valida nuevamente los datos.
-
-        if (autor.length < 2 ||
-                autor.length > 100) {
-
-            mostrarMensaje(
-                "El nombre debe tener entre 2 y 100 caracteres.",
-                false
-            );
-            return;
-        }
-
-        if (!Number.isInteger(calificacion) ||
-                calificacion < 1 ||
-                calificacion > 5) {
-
-            mostrarMensaje(
-                "Selecciona una calificación entre 1 y 5.",
-                false
-            );
-            return;
-        }
-
-        if (comentario.length < 10 ||
-                comentario.length > 1000) {
-
-            mostrarMensaje(
-                "El comentario debe tener entre 10 y 1000 caracteres.",
-                false
-            );
-            return;
-        }
-
-        botonPublicar.disabled = true;
-
-        mensajeFormulario.className = "mensaje";
-        mensajeFormulario.textContent =
-            "Publicando reseña...";
+        estado(
+                el("estado-resena"),
+                "Registrando reseña..."
+        );
 
         try {
 
-            const nuevaResena = {
-                autor: autor,
-                calificacion: calificacion,
-                comentario: comentario
+            const datos = {
+
+                autor: el("r-autor").value.trim(),
+
+                calificacion: Number(
+                        el("r-calificacion").value
+                ),
+
+                comentario:
+                        el("r-comentario").value.trim()
             };
 
-            await solicitarJSON(
-                URL_API + "/" + id + "/resenas",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(nuevaResena)
-                }
+            await solicitar(
+                    apiVivienda(id) + "/resenas",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Accept": "application/json"
+                        },
+
+                        body: JSON.stringify(datos)
+                    }
             );
 
-            formulario.reset();
+            if (viviendaSeleccionada === id) {
 
-            // Consultar nuevamente la base de datos
-            // para visualizar la reseña registrada.
-            await cargarDetalle(id);
+                formularioResena.reset();
 
-            mostrarMensaje(
-                "La reseña se registró correctamente.",
-                true
-            );
+                estado(
+                        el("estado-resena"),
+                        "Reseña registrada correctamente.",
+                        "exito"
+                );
+
+                await cargarResenas(
+                        id,
+                        peticionDetalle
+                );
+            }
 
         } catch (error) {
 
-            mostrarMensaje(
-                "No se pudo publicar la reseña: " +
-                error.message,
-                false
+            estado(
+                    el("estado-resena"),
+                    mensajeError(error),
+                    "error"
             );
 
         } finally {
 
-            botonPublicar.disabled = false;
+            enviar.disabled = false;
         }
     }
 
-    // Mostrar mensajes sin insertar HTML.
-    function mostrarMensaje(texto, correcto) {
+    // ======================================
+    // NUEVA VIVIENDA / CANCELAR EDICION
+    // ======================================
 
-        mensajeFormulario.textContent = texto;
+    function quitarOpcionesTemporales() {
 
-        mensajeFormulario.className =
-            correcto
-                ? "mensaje exito"
-                : "mensaje error";
+        const selector = el("v-disponible");
+
+        for (const opcion of selector.querySelectorAll(
+                "option[data-temporal]"
+        )) {
+            opcion.remove();
+        }
+    }
+
+    function nuevaVivienda() {
+
+        quitarOpcionesTemporales();
+
+        viviendaEnEdicion = null;
+
+        formularioVivienda.reset();
+
+        el("v-disponible").value = "true";
+
+        el("titulo-formulario").textContent =
+                "Agregar vivienda";
+
+        el("guardar-vivienda").textContent =
+                "Registrar vivienda";
+
+        el("ayuda-edicion").textContent =
+                "Completa los datos de la nueva vivienda.";
+
+        el("aviso-disponibilidad").textContent = "";
+
+        estado(el("estado-admin"), "");
     }
 
     // ======================================
-    // EVENTOS
+    // PREPARAR FORMULARIO DE EDICION
     // ======================================
 
-    document.getElementById("actualizar")
-        .addEventListener("click", cargarViviendas);
+    async function prepararEdicion(id) {
 
-    formulario.addEventListener(
-        "submit", publicarResena
+        mostrarAdministracion();
+
+        estado(
+                el("estado-admin"),
+                "Cargando vivienda para editar..."
+        );
+
+        try {
+
+            const v = await solicitar(
+                    apiVivienda(id)
+            );
+
+            viviendaEnEdicion = id;
+
+            el("v-titulo").value =
+                    v.titulo || "";
+
+            el("v-tipo").value =
+                    v.tipo || "";
+
+            el("v-direccion").value =
+                    v.direccion || "";
+
+            el("v-zona").value =
+                    v.zona || "";
+
+            el("v-precio").value =
+                    v.precio;
+
+            el("v-habitaciones").value =
+                    v.habitaciones;
+
+            el("v-descripcion").value =
+                    v.descripcion || "";
+
+            // GET no devuelve el campo disponible.
+            // Por seguridad, debe elegirse manualmente.
+
+            const selector =
+                    el("v-disponible");
+
+            quitarOpcionesTemporales();
+
+            el("titulo-formulario").textContent =
+                    "Editar vivienda #" + id;
+
+            el("guardar-vivienda").textContent =
+                    "Guardar cambios";
+
+            el("ayuda-edicion").textContent =
+                    "Modifica los campos necesarios "
+                    + "y confirma la disponibilidad "
+                    + "antes de guardar.";
+
+            el("aviso-disponibilidad").textContent =
+                    "Importante: la API no devuelve "
+                    + "la disponibilidad actual. "
+                    + "Selecciona expresamente "
+                    + "Disponible o No disponible.";
+
+            const opcion =
+                    document.createElement("option");
+
+            opcion.value = "";
+
+            opcion.textContent =
+                    "Selecciona la disponibilidad";
+
+            opcion.dataset.temporal = "1";
+
+            selector.prepend(opcion);
+
+            selector.value = "";
+
+            estado(el("estado-admin"), "");
+
+            panelAdmin.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+
+        } catch (error) {
+
+            estado(
+                    el("estado-admin"),
+                    mensajeError(error),
+                    "error"
+            );
+        }
+    }
+
+    // ======================================
+    // LEER LOS DATOS DEL FORMULARIO
+    // ======================================
+
+    function leerFormularioVivienda() {
+
+        return {
+
+            titulo: el("v-titulo").value.trim(),
+
+            tipo: el("v-tipo").value.trim(),
+
+            direccion: el("v-direccion").value.trim(),
+
+            zona: el("v-zona").value.trim(),
+
+            precio: Number(
+                    el("v-precio").value
+            ),
+
+            habitaciones: Number(
+                    el("v-habitaciones").value
+            ),
+
+            descripcion:
+                    el("v-descripcion").value.trim(),
+
+            disponible:
+                    el("v-disponible").value === "true"
+
+        };
+    }
+
+    // ======================================
+    // OBTENER CLAVE ADMINISTRATIVA
+    // ======================================
+
+    function obtenerClave() {
+
+        const valor = clave.value;
+
+        if (!valor) {
+
+            throw new Error(
+                    "Introduce la clave administrativa "
+                    + "para continuar."
+            );
+        }
+
+        return valor;
+    }
+
+    // ======================================
+    // POST: AGREGAR VIVIENDA
+    // PUT: ACTUALIZAR VIVIENDA
+    // ======================================
+
+    async function guardarVivienda(evento) {
+
+        evento.preventDefault();
+
+        if (!formularioVivienda.reportValidity()) {
+            return;
+        }
+
+        const enviar =
+                el("guardar-vivienda");
+
+        try {
+
+            const llave = obtenerClave();
+
+            const datos =
+                    leerFormularioVivienda();
+
+            if (!Number.isFinite(datos.precio)
+                    || datos.precio <= 0
+                    || datos.precio > 99999999.99
+                    || !Number.isInteger(datos.habitaciones)
+                    || datos.habitaciones < 1
+                    || datos.habitaciones > 100) {
+
+                throw new Error(
+                        "Comprueba el precio y "
+                        + "el número de habitaciones."
+                );
+            }
+
+            const editando =
+                    viviendaEnEdicion !== null;
+
+            enviar.disabled = true;
+
+            estado(
+                    el("estado-admin"),
+                    editando
+                    ? "Guardando cambios..."
+                    : "Registrando vivienda..."
+            );
+
+            const resultado = await solicitar(
+                    editando
+                    ? apiVivienda(viviendaEnEdicion)
+                    : BASE,
+                    {
+                        method:
+                                editando ? "PUT" : "POST",
+
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Accept": "application/json",
+                            "X-API-Key": llave
+                        },
+
+                        body: JSON.stringify(datos)
+                    }
+            );
+
+            const idGuardado =
+                    editando
+                    ? viviendaEnEdicion
+                    : resultado && resultado.id;
+
+            nuevaVivienda();
+
+            estado(
+                    el("estado-admin"),
+                    (
+                        editando
+                        ? "Vivienda actualizada"
+                        : "Vivienda registrada"
+                    )
+                    + (
+                        idGuardado
+                        ? " (ID " + idGuardado + ")"
+                        : ""
+                    )
+                    + ".",
+                    "exito"
+            );
+
+            ++peticionDetalle;
+
+            viviendaSeleccionada = null;
+
+            panelDetalle.classList.add("oculto");
+
+            await cargarViviendas();
+
+        } catch (error) {
+
+            estado(
+                    el("estado-admin"),
+                    mensajeError(error),
+                    "error"
+            );
+
+        } finally {
+
+            enviar.disabled = false;
+        }
+    }
+
+    // ======================================
+    // DELETE: ELIMINAR VIVIENDA
+    // ======================================
+
+    async function eliminarVivienda(id, titulo) {
+
+        let llave;
+
+        try {
+
+            llave = obtenerClave();
+
+        } catch (error) {
+
+            estado(
+                    el("estado-admin"),
+                    mensajeError(error),
+                    "error"
+            );
+
+            panelAdmin.scrollIntoView({
+                behavior: "smooth"
+            });
+
+            return;
+        }
+
+        const confirmacion = window.confirm(
+                "¿Eliminar la vivienda #"
+                + id
+                + " («"
+                + titulo
+                + "»)? "
+                + "Esta acción no se puede deshacer."
+        );
+
+        if (!confirmacion) {
+            return;
+        }
+
+        estado(
+                el("estado-admin"),
+                "Intentando eliminar la vivienda #"
+                + id + "..."
+        );
+
+        try {
+
+            await solicitar(
+                    apiVivienda(id),
+                    {
+                        method: "DELETE",
+
+                        headers: {
+                            "Accept": "application/json",
+                            "X-API-Key": llave
+                        }
+                    }
+            );
+
+            if (viviendaEnEdicion === id) {
+                nuevaVivienda();
+            }
+
+            if (viviendaSeleccionada === id) {
+
+                ++peticionDetalle;
+
+                viviendaSeleccionada = null;
+
+                panelDetalle.classList.add("oculto");
+            }
+
+            estado(
+                    el("estado-admin"),
+                    "Vivienda #" + id
+                    + " eliminada correctamente.",
+                    "exito"
+            );
+
+            await cargarViviendas();
+
+        } catch (error) {
+
+            estado(
+                    el("estado-admin"),
+                    mensajeError(error),
+                    "error"
+            );
+        }
+
+        panelAdmin.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+    }
+
+    // ======================================
+    // EVENTOS DE LOS BOTONES
+    // ======================================
+
+    el("actualizar").addEventListener(
+            "click",
+            cargarViviendas
     );
 
-    // Cargar viviendas al abrir la página.
+    el("alternar-admin").addEventListener(
+            "click",
+            async () => {
+
+                if (administracionVisible()) {
+
+                    ocultarAdministracion();
+
+                } else {
+
+                    mostrarAdministracion();
+                }
+
+                await cargarViviendas();
+            }
+    );
+
+    el("limpiar-clave").addEventListener(
+            "click",
+            () => {
+
+                clave.value = "";
+
+                clave.focus();
+            }
+    );
+
+    el("nueva-vivienda").addEventListener(
+            "click",
+            nuevaVivienda
+    );
+
+    el("cerrar-detalle").addEventListener(
+            "click",
+            () => {
+
+                ++peticionDetalle;
+
+                viviendaSeleccionada = null;
+
+                panelDetalle.classList.add("oculto");
+            }
+    );
+
+    formularioVivienda.addEventListener(
+            "submit",
+            guardarVivienda
+    );
+
+    formularioResena.addEventListener(
+            "submit",
+            publicarResena
+    );
+
+    el("v-disponible").addEventListener(
+            "change",
+            () => {
+
+                if (el("v-disponible").value) {
+
+                    quitarOpcionesTemporales();
+                }
+            }
+    );
+
+    // ======================================
+    // CARGA INICIAL
+    // ======================================
+
     cargarViviendas();
 
+})();
 </script>
 
 </body>
