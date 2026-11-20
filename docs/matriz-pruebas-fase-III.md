@@ -1,144 +1,241 @@
-# AlquilaUDB — Product Backlog de la Fase III
+# AlquilaUDB — Matriz de pruebas de la Fase III
 
-**Asignatura:** Desarrollo de Aplicaciones con Web Frameworks (DWF901)  
-**Sprint:** III — Servicios REST e Integración de Clientes  
-**Proyecto:** AlquilaUDB  
+**Proyecto:** AlquilaUDB
+**Asignatura:** Desarrollo de Aplicaciones con Web Frameworks (DWF901)
+**Estudiante:** Carlos Víctor Zaun Gómez
+**Fase:** III — Servicios REST e Integración de Clientes
 **Fecha de revisión:** 19 de noviembre de 2026
+**Entorno:** Java 11, Jersey 2.48, Tomcat 9, JPA, Hibernate, MySQL y JavaScript
 
-## 1. Objetivo del sprint
+## 1. Objetivo
 
-Extender AlquilaUDB mediante una API REST que permita consultar y gestionar viviendas y reseñas utilizando HTTP y JSON, reutilizando la persistencia JPA/Hibernate desarrollada durante la Fase II.
+Verificar el funcionamiento de la API REST de AlquilaUDB, sus operaciones CRUD, las validaciones, la seguridad administrativa, la persistencia en MySQL y la integración con un cliente JavaScript independiente.
 
-El incremento incorpora un cliente consumidor independiente, validaciones, respuestas HTTP apropiadas y un mecanismo básico de autorización para las operaciones administrativas.
+Las pruebas incluyen escenarios positivos, negativos, límites, errores de comunicación y restricciones de integridad.
 
-## 2. Historias de usuario
+Se distinguen las pruebas comprobadas mediante curl de las comprobaciones del cliente realizadas desde el navegador.
 
-| ID | Historia de usuario | Prioridad | Estado |
+## 2. Pruebas funcionales de la API REST
+
+| ID | Operación o escenario | Resultado esperado | Estado |
 |---|---|---|---|
-| HU-III-01 | Como desarrollador, quiero configurar una API REST con Jersey y JAX-RS para exponer los servicios de AlquilaUDB. | Alta | Completada |
-| HU-III-02 | Como consumidor, quiero consultar el estado de la API para comprobar que está funcionando. | Media | Completada |
-| HU-III-03 | Como visitante, quiero consultar las viviendas disponibles en el sistema mediante JSON. | Alta | Completada |
-| HU-III-04 | Como visitante, quiero consultar los datos de una vivienda específica. | Alta | Completada |
-| HU-III-05 | Como administrador, quiero registrar viviendas mediante POST para incorporar nuevos inmuebles. | Alta | Completada |
-| HU-III-06 | Como administrador, quiero actualizar viviendas mediante PUT para mantener sus datos. | Alta | Completada |
-| HU-III-07 | Como administrador, quiero eliminar viviendas mediante DELETE cuando las reglas de integridad lo permitan. | Alta | Completada |
-| HU-III-08 | Como visitante, quiero consultar las reseñas de cada vivienda. | Alta | Completada |
-| HU-III-09 | Como visitante, quiero registrar reseñas mediante la API REST. | Alta | Completada |
-| HU-III-10 | Como usuario, quiero utilizar un cliente HTML y JavaScript para consumir los servicios REST. | Alta | Completada |
-| HU-III-11 | Como consumidor de la API, quiero recibir códigos HTTP y mensajes JSON apropiados cuando una solicitud sea incorrecta. | Alta | Completada |
-| HU-III-12 | Como administrador, quiero proteger las operaciones de escritura mediante una clave de acceso. | Alta | Completada |
-| HU-III-13 | Como desarrollador, quiero documentar los endpoints, parámetros, validaciones y respuestas HTTP. | Alta | Completada |
-| HU-III-14 | Como evaluador, quiero disponer de una matriz de pruebas que demuestre los escenarios positivos, negativos y de seguridad. | Alta | En revisión |
-| HU-III-15 | Como usuario del cliente JavaScript, quiero recibir mensajes claros cuando el servidor no responda. | Media | Pendiente de prueba negativa |
-| HU-III-16 | Como desarrollador, quiero comprobar que la actualización de disponibilidad mediante REST se almacena correctamente. | Media | Pendiente de prueba |
-| HU-III-17 | Como evaluador, quiero disponer de evidencias visuales y documentación final de la Fase III. | Alta | Pendiente |
+| REST-01 | GET /api/estado | HTTP 200 y JSON del servicio | Aprobada |
+| REST-02 | GET /api/viviendas | HTTP 200 y colección JSON | Aprobada |
+| REST-03 | GET de vivienda existente | HTTP 200 y datos del registro | Aprobada |
+| REST-04 | GET de vivienda inexistente | HTTP 404 | Aprobada |
+| REST-05 | GET con identificador inválido | HTTP 400 | Aprobada |
+| REST-06 | GET de reseñas de vivienda existente | HTTP 200 y colección JSON | Aprobada |
+| REST-07 | GET de reseñas de vivienda inexistente | HTTP 404 | Aprobada |
+| REST-08 | GET de reseñas con ID inválido | HTTP 400 | Aprobada |
+| REST-09 | POST de reseña válida | HTTP 201 | Aprobada |
+| REST-10 | POST de reseña con calificación inválida | HTTP 400 | Aprobada |
+| REST-11 | POST de vivienda válida | HTTP 201 y cabecera Location | Aprobada |
+| REST-12 | POST de vivienda con precio negativo | HTTP 400 | Aprobada |
+| REST-13 | PUT de vivienda existente | HTTP 200 | Aprobada |
+| REST-14 | PUT con precio negativo | HTTP 400 | Aprobada |
+| REST-15 | DELETE de vivienda con reseñas | HTTP 409 | Aprobada |
+| REST-16 | GET de reseñas de vivienda sin opiniones | HTTP 200 y [] | Aprobada |
+| REST-17 | DELETE de vivienda temporal sin reseñas | HTTP 204 | Aprobada |
+| REST-18 | GET después de eliminar una vivienda | HTTP 404 | Aprobada |
 
-## 3. Criterios de aceptación
+### Observación
 
-### Servicios REST
+Las primeras pruebas de POST, PUT y DELETE se realizaron antes de activar la protección administrativa.
 
-Se considera aceptada la funcionalidad cuando:
+Posteriormente se comprobó que estas operaciones requieren una clave válida.
 
-- Los servicios se encuentran disponibles bajo `/AlquilaUDB/api`.
-- Las solicitudes utilizan los métodos HTTP correspondientes.
-- Las respuestas de consulta y registro se representan mediante JSON.
-- Las operaciones de persistencia utilizan `ViviendaJpaDAO`.
-- La API respeta las restricciones de integridad entre viviendas y reseñas.
+La vivienda temporal con ID 19 fue creada, modificada y eliminada durante las pruebas.
 
-### Validaciones y errores
+## 3. Pruebas de seguridad
 
-- Los datos incorrectos son rechazados con HTTP 400.
-- Los recursos inexistentes generan HTTP 404.
-- La eliminación de viviendas con reseñas genera HTTP 409.
-- El contenido JSON malformado genera HTTP 400 con respuesta JSON.
-- Los tipos de contenido incompatibles generan HTTP 415 con respuesta JSON.
+| ID | Escenario | HTTP esperado | HTTP obtenido | Estado |
+|---|---|---|---|---|
+| SEG-01 | Consulta GET pública | 200 | 200 | Aprobada |
+| SEG-02 | Solicitud administrativa sin clave configurada en Tomcat | 503 | 503 | Aprobada |
+| SEG-03 | Solicitud protegida sin X-API-Key | 401 | 401 | Aprobada |
+| SEG-04 | Solicitud con clave incorrecta | 403 | 403 | Aprobada |
+| SEG-05 | Clave válida, pero DELETE de vivienda con reseñas | 409 | 409 | Aprobada |
 
-### Seguridad
+### Interpretación
 
-- Las consultas públicas no necesitan credenciales.
-- Registrar, actualizar y eliminar viviendas requiere `X-API-Key`.
-- La ausencia de credencial genera HTTP 401 cuando el servidor está configurado.
-- Una credencial inválida genera HTTP 403.
-- La ausencia de configuración administrativa genera HTTP 503.
-- Una credencial correcta no permite incumplir las reglas de negocio.
-- La clave administrativa no se almacena dentro del repositorio.
+El código 401 demuestra que el servidor exige credenciales.
 
-### Cliente consumidor
+El código 403 confirma que se rechazan las claves incorrectas.
 
-- Consulta viviendas utilizando `fetch()`.
-- Presenta detalles y reseñas.
-- Permite registrar nuevas reseñas.
-- Actualiza la información después del registro.
-- Dispone de mensajes de carga, éxito y error.
+El código 409 demuestra que una solicitud autorizada sigue sometida a las reglas de integridad de la aplicación.
 
-## 4. Incremento desarrollado
+La clave administrativa permanece fuera del código fuente.
 
-### Configuración REST
+## 4. Pruebas del cliente JavaScript
 
-Se incorporaron las dependencias necesarias de Jersey y Jackson al proyecto Maven.
+El archivo `cliente-rest.html` utiliza `fetch()` para consumir la API REST.
 
-La clase `ApiConfig` configura los recursos REST, el filtro de seguridad y los manejadores de excepciones.
+La versión ampliada incorpora una sección administrativa para agregar, editar y eliminar viviendas.
 
-### Gestión de viviendas
+### 4.1. Consultas y reseñas
 
-Se implementaron las operaciones GET, POST, PUT y DELETE.
+| ID | Funcionalidad | Resultado esperado | Estado |
+|---|---|---|---|
+| CLI-01 | Abrir cliente-rest.html | Mostrar viviendas cargadas desde REST | Aprobada |
+| CLI-02 | Consultar detalle | Mostrar información de vivienda | Aprobada |
+| CLI-03 | Consultar reseñas | Mostrar reseñas asociadas | Aprobada |
+| CLI-04 | Registrar reseña | Guardar opinión mediante POST | Aprobada |
+| CLI-05 | Actualizar reseñas después del registro | Mostrar la nueva opinión | Aprobada |
+| CLI-06 | Comprobar información compartida con JSF | Mostrar información persistente en MySQL | Aprobada |
+| CLI-07 | Detener y reiniciar Tomcat | Detectar fallo y recuperar consultas | Aprobada con observación |
 
-Los servicios reutilizan la persistencia JPA/Hibernate de la Fase II, evitando duplicar la lógica de acceso a datos.
+En CLI-07 se observó que el cliente anterior detectaba la interrupción y posteriormente recuperaba la consulta.
 
-### Gestión de reseñas
+La versión ampliada incluye un mensaje más comprensible. Su presentación exacta puede verificarse durante la revisión final.
 
-Se implementaron la consulta y el registro de reseñas asociadas a viviendas.
+### 4.2. Administración de viviendas
 
-La API valida autor, calificación y comentario antes del registro.
+| ID | Funcionalidad | Resultado esperado | Estado |
+|---|---|---|---|
+| CLI-08 | Abrir "Administrar viviendas" | Mostrar formulario y botones administrativos | Aprobada |
+| CLI-09 | Registrar vivienda desde formulario | HTTP 201 y nuevo registro visible | Pendiente de evidencia individual |
+| CLI-10 | Editar vivienda desde formulario | HTTP 200 y cambios persistentes | Pendiente de evidencia individual |
+| CLI-11 | Eliminar vivienda temporal desde botón | HTTP 204 y registro eliminado | Pendiente de evidencia individual |
+| CLI-12 | Eliminar vivienda con reseñas desde botón | HTTP 409 y registro conservado | Pendiente de evidencia individual |
+| CLI-13 | Operación administrativa sin clave | HTTP 401 y mensaje de error | Pendiente de evidencia individual |
+| CLI-14 | Operación administrativa con clave incorrecta | HTTP 403 y mensaje de error | Pendiente de evidencia individual |
+| CLI-15 | Consultar y publicar reseñas con cliente ampliado | Conservar funciones anteriores | Pendiente de evidencia individual |
 
-### Seguridad
+### 4.3. Alcance de las comprobaciones
 
-Se implementó `SeguridadApiFilter` para controlar las solicitudes administrativas mediante una clave configurada como variable de entorno.
+El funcionamiento general de la nueva interfaz fue confirmado después de actualizar y desplegar `cliente-rest.html`.
 
-### Manejo de excepciones
+Sin embargo, todavía no se han incorporado a esta matriz resultados individuales de cada operación administrativa ejecutada desde sus botones.
 
-Se añadieron `JsonMalformadoMapper` y `TipoContenidoMapper` para devolver errores JSON uniformes ante solicitudes malformadas o formatos incompatibles.
+Las operaciones REST equivalentes sí fueron comprobadas previamente mediante curl.
 
-### Cliente REST
+Antes de cerrar la entrega se recomienda realizar una secuencia completa con una vivienda temporal:
 
-Se desarrolló `cliente-rest.html` con JavaScript y `fetch()` como consumidor independiente de los servicios.
+1. Registrar una vivienda desde JavaScript.
+2. Confirmar que aparece en el listado.
+3. Modificar el título y el precio.
+4. Confirmar que los nuevos valores aparecen.
+5. Eliminar la vivienda temporal.
+6. Confirmar que desaparece del listado.
 
-## 5. Pruebas del sprint
+También conviene comprobar desde la interfaz que no se puede eliminar una vivienda con reseñas.
 
-Se comprobaron operaciones satisfactorias de consulta, registro, actualización y eliminación, además de respuestas ante datos inválidos, recursos inexistentes y conflictos de integridad.
+## 5. Pruebas de límites y validaciones
 
-También se verificaron los códigos HTTP 401, 403 y 503 correspondientes a situaciones de autorización y configuración administrativa.
+| ID | Condición | Resultado esperado | Estado |
+|---|---|---|---|
+| LIM-01 | Comentario de 5 caracteres | HTTP 400 | Aprobada |
+| LIM-02 | Comentario de 1001 caracteres | HTTP 400 | Aprobada |
+| LIM-03 | Calificación decimal 3.5 | HTTP 400 | Aprobada |
+| LIM-04 | Título de dos caracteres | HTTP 400 | Aprobada |
+| LIM-05 | PUT sobre vivienda inexistente | HTTP 404 | Aprobada |
+| LIM-06 | DELETE sobre vivienda inexistente | HTTP 404 | Aprobada |
+| LIM-07 | JSON malformado | HTTP 400 y JSON de error | Aprobada |
+| LIM-08 | Content-Type text/plain en endpoint JSON | HTTP 415 y JSON de error | Aprobada |
+| LIM-09 | Cambios de disponibilidad mediante PUT | Persistencia de 0 y 1 en MySQL | Aprobada |
+| LIM-10 | Interrupción del servidor y recuperación | Mensaje de error y recuperación | Aprobada con observación |
 
-Las pruebas adicionales LIM-01 a LIM-08 se ejecutaron satisfactoriamente. Permanecen pendientes LIM-09 y LIM-10.
+### 5.1. Resultados LIM-01 a LIM-03
 
-La información detallada se encuentra en `docs/matriz-pruebas-fase-III.md`.
+Las tres solicitudes devolvieron HTTP 400.
 
-## 6. Pendientes para el cierre
+La API rechazó comentarios demasiado cortos, comentarios demasiado largos y calificaciones no enteras.
 
-| Tarea | Prioridad | Estado |
+### 5.2. Resultados LIM-04 a LIM-06
+
+Se verificaron:
+
+- HTTP 400 al intentar registrar un título de dos caracteres.
+- HTTP 404 al actualizar un registro inexistente.
+- HTTP 404 al eliminar un registro inexistente.
+
+### 5.3. Resultados LIM-07 y LIM-08
+
+Inicialmente, JSON malformado devolvía texto plano y el contenido incompatible devolvía HTML.
+
+Se incorporaron manejadores JAX-RS y se repitieron ambas pruebas.
+
+Resultados finales:
+
+- HTTP 400 con Content-Type application/json.
+- HTTP 415 con Content-Type application/json.
+
+### 5.4. Resultado LIM-09
+
+Se creó una vivienda temporal para comprobar el campo `disponible`.
+
+Se modificó mediante PUT y se verificó en MySQL que podía almacenarse con los valores 0 y 1.
+
+El estudiante confirmó ambas comprobaciones.
+
+### 5.5. Resultado LIM-10
+
+Con Tomcat detenido, el cliente detectó el error de comunicación.
+
+Después de reiniciar Tomcat, las consultas funcionaron nuevamente.
+
+La prueba comprobó el manejo funcional del fallo. Se identificó como mejora la presentación de mensajes más comprensibles.
+
+## 6. Códigos HTTP comprobados
+
+| Código | Significado | Aplicación |
 |---|---|---|
-| Confirmar persistencia del campo `disponible` mediante PUT | Media | Pendiente |
-| Verificar el manejo de fallos de conexión en el cliente JavaScript | Media | Pendiente |
-| Revisar la documentación y el README del repositorio | Alta | Pendiente |
-| Reunir capturas de las funcionalidades y respuestas HTTP | Alta | Pendiente |
-| Preparar el informe de evidencias de la Fase III | Alta | Pendiente |
-| Respaldar el incremento y la documentación en GitHub | Alta | Pendiente |
+| 200 | OK | Consultas y actualizaciones |
+| 201 | Created | Registro de viviendas y reseñas |
+| 204 | No Content | Eliminación correcta |
+| 400 | Bad Request | Datos inválidos o JSON malformado |
+| 401 | Unauthorized | Credencial ausente |
+| 403 | Forbidden | Credencial incorrecta |
+| 404 | Not Found | Recurso inexistente |
+| 409 | Conflict | Restricción por reseñas asociadas |
+| 415 | Unsupported Media Type | Contenido incompatible |
+| 503 | Service Unavailable | Seguridad administrativa sin configurar |
 
-## 7. Consideraciones técnicas
+## 7. Incidencias del desarrollo
 
-La autorización implementada se limita a los recursos REST protegidos. No constituye un sistema general de usuarios y roles para toda la aplicación.
+| ID | Incidencia | Solución | Estado |
+|---|---|---|---|
+| INC-01 | Clases REST ubicadas inicialmente en una ruta incorrecta | Traslado al paquete com.alquilaudb.api | Resuelta |
+| INC-02 | Problemas de conexión con Tomcat | Reinicio y comprobación del servidor | Resuelta |
+| INC-03 | POST de vivienda devolvió inicialmente HTTP 404 | Revisión del despliegue y de los recursos Jersey | Resuelta |
+| INC-04 | Clave administrativa demasiado corta | Corrección de variable de entorno | Resuelta |
+| INC-05 | Tomcat no recibía la clave actualizada | Reinicio completo del entorno | Resuelta |
+| INC-06 | Errores 400/415 sin formato JSON uniforme | Incorporación de ExceptionMapper | Resuelta |
+| INC-07 | Cliente REST sin controles administrativos | Ampliación de cliente-rest.html | Resuelta |
+| INC-08 | Navegador mostraba una versión anterior del cliente | Recarga y comprobación del despliegue | Resuelta |
 
-El registro público de reseñas conserva sus validaciones, pero requeriría medidas adicionales contra abusos si la aplicación se publicara en Internet.
+## 8. Evidencias para el informe final
 
-La API se ha desarrollado y comprobado en un entorno local de Tomcat y MySQL.
+Se recomienda incluir capturas auténticas de:
 
-## 8. Conclusión
+- El paquete com.alquilaudb.api en NetBeans.
+- ApiConfig.java con recursos, filtro y manejadores.
+- GET /api/viviendas devolviendo JSON.
+- Cliente JavaScript con el listado de viviendas.
+- Detalle y reseñas de una vivienda.
+- Formulario de administración de viviendas.
+- Registro de una vivienda temporal desde JavaScript.
+- Edición y eliminación desde el navegador.
+- Respuestas HTTP 401, 403 y 409.
+- Documentación y commits del repositorio GitHub.
 
-La Fase III incorpora comunicación REST, serialización JSON, un cliente independiente, operaciones CRUD, validaciones y controles básicos de autorización.
+No deben incluirse claves administrativas ni otros secretos.
 
-El sprint conserva la integración con las funcionalidades de las fases anteriores y proporciona un incremento funcional que puede comprobarse tanto desde herramientas HTTP como desde la interfaz web.
+## 9. Resultado general
 
-El trabajo restante se concentra en las últimas verificaciones, la preparación de evidencias y el cierre documental.
+Las operaciones REST, validaciones, controles de acceso, manejo de errores JSON y persistencia fueron comprobados durante el Sprint III.
+
+El cliente JavaScript se amplió para integrar las operaciones administrativas y se confirmó el funcionamiento general de la interfaz.
+
+Para completar la evidencia del cliente ampliado deben registrarse los resultados individuales CLI-09 a CLI-15.
+
+## 10. Conclusión
+
+La matriz demuestra el funcionamiento de los endpoints REST, las validaciones de entradas, las reglas de integridad y el control de acceso básico.
+
+La ampliación del cliente JavaScript permite utilizar el CRUD desde una interfaz web y mejora la demostración de integración entre frontend, servicios REST y base de datos.
+
+La documentación diferencia los resultados efectivamente observados de los casos que todavía necesitan evidencia individual.
 
 ---
 

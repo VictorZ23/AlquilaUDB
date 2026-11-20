@@ -1,67 +1,121 @@
 # AlquilaUDB — Documentación de la API REST
 
-**Proyecto:** AlquilaUDB  
-**Asignatura:** Desarrollo de Aplicaciones con Web Frameworks (DWF901)  
-**Fase:** III — Servicios REST e Integración de Clientes  
-**Tecnologías:** Java 11, Jersey 2.48, JAX-RS, Jackson, CDI, JPA, Hibernate y MySQL
+**Proyecto:** AlquilaUDB
+**Asignatura:** Desarrollo de Aplicaciones con Web Frameworks (DWF901)
+**Fase:** III — Servicios REST e Integración de Clientes
+**Fecha de revisión:** 19 de noviembre de 2026
+**Repositorio:** https://github.com/VictorZ23/AlquilaUDB
 
 ## 1. Introducción
 
-Durante la Fase III de AlquilaUDB se implementó una API REST para permitir que aplicaciones cliente consulten y gestionen información de viviendas mediante solicitudes HTTP y respuestas JSON.
+Durante la Fase III se incorporó una API REST a AlquilaUDB para permitir la consulta y administración de viviendas y reseñas mediante HTTP y JSON.
 
-La API reutiliza las entidades, los métodos de persistencia y las reglas de negocio desarrolladas durante la Fase II.
+La implementación reutiliza las entidades y la persistencia JPA/Hibernate desarrolladas durante la Fase II.
 
-También se incorporó un cliente independiente desarrollado con HTML y JavaScript, que utiliza `fetch()` para comunicarse con los servicios REST.
+También se desarrolló un cliente independiente con HTML, CSS y JavaScript. Inicialmente permitía consultar viviendas y publicar reseñas. Posteriormente se amplió para incorporar la creación, edición y eliminación de viviendas desde el navegador.
 
-## 2. Arquitectura
+## 2. Objetivos
 
-La aplicación sigue el siguiente flujo:
+- Diseñar servicios REST para viviendas y reseñas.
+- Implementar operaciones HTTP con Jersey y JAX-RS.
+- Utilizar JSON como formato de intercambio.
+- Integrar la API con JPA, Hibernate y MySQL.
+- Validar solicitudes y proporcionar códigos HTTP adecuados.
+- Proteger las operaciones administrativas.
+- Desarrollar un cliente consumidor independiente de JSF.
+- Demostrar el CRUD completo mediante HTTP y JavaScript.
 
-**Cliente HTTP → Jersey / JAX-RS → ViviendaResource → ViviendaJpaDAO → Hibernate / JPA → MySQL**
+## 3. Tecnologías utilizadas
 
-Los principales componentes son:
-
-| Componente | Responsabilidad |
+| Tecnología | Función |
 |---|---|
-| `ApiConfig.java` | Configurar y registrar los recursos REST y el filtro de seguridad |
-| `EstadoResource.java` | Comprobar el funcionamiento de la API |
-| `ViviendaResource.java` | Procesar las solicitudes HTTP sobre viviendas y reseñas |
-| `SeguridadApiFilter.java` | Controlar el acceso a las operaciones administrativas |
-| `ViviendaJpaDAO.java` | Realizar las operaciones de persistencia |
-| `Vivienda.java` | Representar la entidad de vivienda |
-| `Resena.java` | Representar las reseñas vinculadas a viviendas |
-| `cliente-rest.html` | Consumir la API mediante JavaScript |
+| Java 11 | Lenguaje de programación |
+| Maven | Gestión del proyecto y dependencias |
+| Apache Tomcat 9 | Servidor web |
+| Jersey 2.48 | Implementación de JAX-RS |
+| Jackson | Procesamiento y serialización JSON |
+| CDI / Weld | Integración de componentes |
+| JPA / Hibernate | Persistencia de entidades |
+| MySQL | Base de datos |
+| HTML5 y CSS3 | Interfaz del cliente |
+| JavaScript y fetch() | Consumo de servicios REST |
+| NetBeans 11.3 | Entorno de desarrollo |
+| Git y GitHub | Control de versiones |
 
-El formato de intercambio de información es JSON, procesado mediante Jackson.
+## 4. Arquitectura
 
-## 3. Dirección base
+La aplicación utiliza el siguiente flujo:
 
-En el entorno local, los servicios se encuentran bajo:
+Cliente HTML/JavaScript
+        |
+        | HTTP / JSON
+        v
+Jersey / JAX-RS
+        |
+        v
+SeguridadApiFilter
+        |
+        v
+EstadoResource / ViviendaResource
+        |
+        v
+ViviendaJpaDAO
+        |
+        v
+JPA / Hibernate
+        |
+        v
+MySQL
 
-`http://localhost:8080/AlquilaUDB/api`
+Las páginas JSP y JSF de fases anteriores siguen utilizando la misma base de datos.
 
-Las direcciones documentadas corresponden a la configuración utilizada durante el desarrollo. El contexto y el puerto pueden variar en otro servidor.
+La API REST constituye una vía adicional de acceso a las funcionalidades del sistema.
 
-## 4. Endpoints disponibles
+### 4.1. Componentes principales
 
-| Método | Ruta | Descripción | Acceso |
+| Clase o archivo | Responsabilidad |
+|---|---|
+| ApiConfig.java | Registrar recursos, filtros y manejadores |
+| EstadoResource.java | Comprobar el estado de la API |
+| ViviendaResource.java | Gestionar viviendas y reseñas |
+| SeguridadApiFilter.java | Proteger las operaciones administrativas |
+| JsonMalformadoMapper.java | Gestionar errores de JSON malformado |
+| TipoContenidoMapper.java | Gestionar tipos de contenido incompatibles |
+| ViviendaJpaDAO.java | Ejecutar operaciones de persistencia |
+| Vivienda.java | Entidad de vivienda |
+| Resena.java | Entidad de reseña |
+| cliente-rest.html | Interfaz JavaScript consumidora de REST |
+
+## 5. Dirección base
+
+En el entorno de desarrollo:
+
+http://localhost:8080/AlquilaUDB/api
+
+Las direcciones corresponden a Tomcat ejecutándose localmente en el puerto 8080.
+
+## 6. Contrato de endpoints
+
+| Método | Endpoint | Funcionalidad | Acceso |
 |---|---|---|---|
-| GET | `/estado` | Comprobar estado de la API | Público |
-| GET | `/viviendas` | Listar viviendas | Público |
-| GET | `/viviendas/{id}` | Consultar vivienda individual | Público |
-| POST | `/viviendas` | Registrar vivienda | Administrativo |
-| PUT | `/viviendas/{id}` | Actualizar vivienda | Administrativo |
-| DELETE | `/viviendas/{id}` | Eliminar vivienda | Administrativo |
-| GET | `/viviendas/{id}/resenas` | Consultar reseñas | Público |
-| POST | `/viviendas/{id}/resenas` | Registrar reseña | Público |
+| GET | /estado | Consultar estado de la API | Público |
+| GET | /viviendas | Listar viviendas | Público |
+| GET | /viviendas/{id} | Obtener una vivienda | Público |
+| POST | /viviendas | Registrar vivienda | Administrativo |
+| PUT | /viviendas/{id} | Actualizar vivienda | Administrativo |
+| DELETE | /viviendas/{id} | Eliminar vivienda | Administrativo |
+| GET | /viviendas/{id}/resenas | Consultar reseñas | Público |
+| POST | /viviendas/{id}/resenas | Registrar reseña | Público |
 
-## 5. Descripción de los servicios
+Los endpoints utilizan JSON para representar los recursos y los errores controlados.
 
-### 5.1. GET /estado
+## 7. Descripción de servicios
 
-Comprueba que la API REST esté funcionando.
+### 7.1. GET /estado
 
-**Respuesta:** HTTP 200.
+Comprueba el funcionamiento de la API.
+
+Respuesta esperada: HTTP 200.
 
 Ejemplo:
 
@@ -73,53 +127,54 @@ Ejemplo:
 }
 ```
 
-### 5.2. GET /viviendas
+### 7.2. GET /viviendas
 
-Obtiene la colección de viviendas registradas en MySQL.
+Obtiene todas las viviendas registradas.
 
-**Respuesta:** HTTP 200.
+Respuesta correcta: HTTP 200.
 
-Ejemplo ilustrativo:
+Ejemplo ilustrativo de un elemento de la colección:
 
 ```json
-[
-  {
-    "id": 1,
-    "titulo": "Apartamento universitario",
-    "tipo": "Apartamento",
-    "direccion": "Colonia Universitaria",
-    "zona": "San Salvador",
-    "precio": 350.04,
-    "habitaciones": 2,
-    "descripcion": "Apartamento cercano a la universidad."
-  }
-]
+{
+  "id": 1,
+  "titulo": "Apartamento universitario",
+  "tipo": "Apartamento",
+  "direccion": "Colonia Universitaria",
+  "zona": "San Salvador",
+  "precio": 350.04,
+  "habitaciones": 2,
+  "descripcion": "Apartamento cercano a la universidad."
+}
 ```
 
-La respuesta contiene los campos seleccionados por `convertirVivienda()`.
+La disponibilidad se almacena en MySQL, pero el método actual que construye las respuestas JSON no incluye el campo `disponible`.
 
-La disponibilidad se almacena en la entidad, pero todavía no se incluye en la representación JSON actual de esta API.
+### 7.3. GET /viviendas/{id}
 
-### 5.3. GET /viviendas/{id}
+Obtiene la información de una vivienda específica.
 
-Consulta los datos de una vivienda específica.
+Parámetro:
 
-**Parámetro:** `id`, entero positivo.
+- `id`: identificador entero positivo.
 
 Respuestas:
 
-- HTTP 200: vivienda encontrada.
-- HTTP 400: identificador inválido.
-- HTTP 404: vivienda inexistente.
-- HTTP 500: error interno de consulta.
+| HTTP | Situación |
+|---|---|
+| 200 | Vivienda encontrada |
+| 400 | Identificador inválido |
+| 404 | Vivienda inexistente |
+| 500 | Error interno |
 
-### 5.4. POST /viviendas
+### 7.4. POST /viviendas
 
-Registra una nueva vivienda.
+Registra una vivienda nueva.
 
-**Acceso:** requiere la cabecera `X-API-Key`.
+Requiere:
 
-**Formato:** `Content-Type: application/json`.
+- Content-Type: application/json
+- X-API-Key: clave administrativa
 
 Ejemplo de solicitud:
 
@@ -131,55 +186,77 @@ Ejemplo de solicitud:
   "zona": "Soyapango",
   "precio": 175.50,
   "habitaciones": 1,
-  "descripcion": "Vivienda registrada desde REST.",
+  "descripcion": "Registro temporal de prueba.",
   "disponible": true
 }
 ```
 
-Si el registro es correcto, responde HTTP 201 Created e incluye una cabecera `Location` con la dirección del nuevo recurso.
+Respuesta correcta: HTTP 201 Created.
 
-Cuando los datos no cumplen las reglas de validación, responde HTTP 400.
+La respuesta incluye una cabecera `Location` con la dirección del recurso creado y un JSON con sus datos.
 
-### 5.5. PUT /viviendas/{id}
+Los datos inválidos producen HTTP 400.
 
-Actualiza una vivienda existente, sustituyendo los campos administrados mediante la API.
+### 7.5. PUT /viviendas/{id}
 
-**Acceso:** requiere `X-API-Key`.
+Actualiza una vivienda existente.
 
-**Parámetro:** `id`, entero positivo.
+Requiere:
 
-**Formato:** JSON con los datos de la vivienda. En esta operación debe incluirse `disponible`.
+- Identificador válido en la URL.
+- Cuerpo JSON con los datos completos.
+- Cabecera X-API-Key.
+- Campo `disponible` obligatorio.
 
-El identificador se indica exclusivamente en la URL y no debe enviarse dentro del cuerpo JSON.
+El identificador no debe incluirse dentro del cuerpo JSON.
+
+Ejemplo:
+
+```json
+{
+  "titulo": "Habitacion REST actualizada",
+  "tipo": "Habitacion",
+  "direccion": "Colonia Universitaria, casa 12",
+  "zona": "Soyapango",
+  "precio": 180.50,
+  "habitaciones": 2,
+  "descripcion": "Registro actualizado desde REST.",
+  "disponible": false
+}
+```
 
 Respuestas:
 
-- HTTP 200: actualización correcta.
-- HTTP 400: datos o identificador inválidos.
-- HTTP 404: vivienda inexistente.
-- HTTP 500: error interno.
+| HTTP | Situación |
+|---|---|
+| 200 | Actualización correcta |
+| 400 | Datos inválidos |
+| 404 | Vivienda inexistente |
+| 500 | Error interno |
 
-### 5.6. DELETE /viviendas/{id}
+### 7.6. DELETE /viviendas/{id}
 
-Elimina una vivienda cuando las reglas de integridad lo permiten.
+Elimina una vivienda, siempre que no tenga reseñas asociadas.
 
-**Acceso:** requiere `X-API-Key`.
+Requiere la cabecera X-API-Key.
 
 Respuestas:
 
-- HTTP 204: vivienda eliminada correctamente, sin cuerpo de respuesta.
-- HTTP 400: identificador inválido.
-- HTTP 404: vivienda inexistente.
-- HTTP 409: vivienda con reseñas asociadas; eliminación rechazada.
-- HTTP 500: error interno.
+| HTTP | Situación |
+|---|---|
+| 204 | Eliminación correcta, sin cuerpo |
+| 400 | Identificador inválido |
+| 404 | Vivienda inexistente |
+| 409 | Vivienda con reseñas asociadas |
+| 500 | Error interno |
 
-La operación reutiliza el método de eliminación del DAO, que comprueba la existencia de reseñas y protege la relación entre entidades.
+La protección de integridad se implementa en la capa de persistencia y se conserva cuando la operación se ejecuta desde REST.
 
-### 5.7. GET /viviendas/{id}/resenas
+### 7.7. GET /viviendas/{id}/resenas
 
-Consulta las reseñas registradas para una vivienda existente.
+Consulta las reseñas de una vivienda.
 
-**Respuesta:** HTTP 200.
+Respuesta correcta: HTTP 200.
 
 Ejemplo ilustrativo:
 
@@ -187,101 +264,121 @@ Ejemplo ilustrativo:
 [
   {
     "id": 5,
-    "autor": "Prueba REST",
-    "calificacion": 5,
-    "comentario": "Reseña registrada mediante la API.",
+    "autor": "Estudiante",
+    "calificacion": 4,
+    "comentario": "La habitacion esta en buenas condiciones.",
     "fecha": "2026-11-19 08:32:37"
   }
 ]
 ```
 
-Si la vivienda existe, pero no tiene reseñas, se devuelve una colección vacía: `[]`.
+Cuando una vivienda existe, pero no tiene reseñas, la respuesta es:
 
-Si la vivienda no existe, se devuelve HTTP 404.
+```json
+[]
+```
 
-### 5.8. POST /viviendas/{id}/resenas
+Un identificador inválido produce HTTP 400 y una vivienda inexistente produce HTTP 404.
 
-Registra una nueva reseña asociada a una vivienda existente.
+### 7.8. POST /viviendas/{id}/resenas
 
-**Formato:** JSON.
+Registra una reseña vinculada a una vivienda existente.
 
-Ejemplo de solicitud:
+Esta operación es pública en la implementación actual.
+
+Ejemplo:
 
 ```json
 {
   "autor": "Cliente JavaScript",
   "calificacion": 4,
-  "comentario": "Esta reseña fue registrada desde el cliente REST."
+  "comentario": "Esta reseña fue enviada desde el cliente REST."
 }
 ```
 
 Respuestas:
 
-- HTTP 201: reseña registrada.
-- HTTP 400: información inválida.
-- HTTP 404: vivienda inexistente.
-- HTTP 500: error interno.
+| HTTP | Situación |
+|---|---|
+| 201 | Reseña registrada |
+| 400 | Información inválida |
+| 404 | Vivienda inexistente |
+| 500 | Error interno |
 
-La fecha de la reseña es generada por MySQL. Por ello, la respuesta inmediata del registro puede mostrar `fecha: null`. La fecha almacenada aparece al consultar nuevamente las reseñas.
+La fecha es generada por MySQL. La respuesta inmediata del registro puede contener `fecha: null`; la fecha almacenada aparece al consultar nuevamente las reseñas.
 
-## 6. Reglas de validación
+## 8. Validaciones del servidor
 
-### Viviendas
+### 8.1. Viviendas
 
 | Campo | Reglas |
 |---|---|
-| `titulo` | Texto de 3 a 100 caracteres |
-| `tipo` | Texto de 2 a 30 caracteres |
-| `direccion` | Texto de 5 a 150 caracteres |
-| `zona` | Texto de 2 a 100 caracteres |
-| `precio` | Número positivo, máximo 99,999,999.99 y dos decimales |
-| `habitaciones` | Entero entre 1 y 100 |
-| `descripcion` | Texto opcional de hasta 3,000 caracteres |
-| `disponible` | Booleano `true` o `false`; obligatorio en PUT y opcional en POST |
+| titulo | Texto de 3 a 100 caracteres |
+| tipo | Texto de 2 a 30 caracteres |
+| direccion | Texto de 5 a 150 caracteres |
+| zona | Texto de 2 a 100 caracteres |
+| precio | Número positivo, máximo 99999999.99 y hasta dos decimales |
+| habitaciones | Entero entre 1 y 100 |
+| descripcion | Texto opcional, máximo 3000 caracteres |
+| disponible | Booleano; opcional en POST y obligatorio en PUT |
 
-### Reseñas
+Cuando `disponible` no se envía en POST, se utiliza `true` como valor predeterminado.
+
+### 8.2. Reseñas
 
 | Campo | Reglas |
 |---|---|
-| `autor` | Texto de 2 a 100 caracteres |
-| `calificacion` | Entero entre 1 y 5 |
-| `comentario` | Texto de 10 a 1,000 caracteres |
+| autor | Texto de 2 a 100 caracteres |
+| calificacion | Entero entre 1 y 5 |
+| comentario | Texto de 10 a 1000 caracteres |
 
-Las validaciones se ejecutan en el servidor. El cliente JavaScript realiza comprobaciones adicionales para facilitar la corrección de errores, pero no sustituye las validaciones de la API.
+Las validaciones se ejecutan en el servidor y no dependen de las comprobaciones del navegador.
 
-## 7. Seguridad y autorización
+## 9. Seguridad administrativa
 
-Se implementó `SeguridadApiFilter`, un filtro JAX-RS que intercepta las solicitudes antes de ejecutar las operaciones protegidas.
+Se implementó `SeguridadApiFilter`, un filtro JAX-RS que controla el acceso a las operaciones administrativas.
 
-Las operaciones administrativas requieren una clave enviada mediante la cabecera HTTP:
+Las consultas GET son públicas, al igual que el registro de reseñas.
 
-`X-API-Key`
+Las siguientes operaciones requieren autorización:
 
-La clave válida se obtiene de la variable de entorno:
+- POST /viviendas
+- PUT /viviendas/{id}
+- DELETE /viviendas/{id}
 
-`ALQUILAUDB_API_KEY`
+El cliente envía la credencial mediante:
 
-Esta variable debe configurarse en el entorno donde se ejecuta Tomcat.
+X-API-Key: [credencial administrativa]
 
-La API exige que la clave configurada tenga al menos 24 caracteres.
+El servidor consulta la variable de entorno:
 
-### Respuestas del filtro
+ALQUILAUDB_API_KEY
+
+La clave configurada debe tener por lo menos 24 caracteres.
+
+### 9.1. Respuestas de seguridad
 
 | HTTP | Situación |
 |---|---|
-| 503 | La clave administrativa del servidor no está configurada correctamente |
-| 401 | La solicitud administrativa no proporciona una clave |
-| 403 | La clave recibida es incorrecta |
+| 503 | Clave administrativa del servidor no configurada |
+| 401 | Solicitud protegida sin credencial |
+| 403 | Credencial incorrecta |
 
-Las consultas GET permanecen públicas. El registro de reseñas también es público en la implementación actual.
+Una clave correcta autoriza la solicitud, pero no elimina las restricciones de integridad. Por ejemplo, eliminar una vivienda con reseñas devuelve HTTP 409.
 
-Este mecanismo representa una medida básica de control de acceso para el entorno académico local. No constituye un sistema completo de gestión de usuarios y roles.
+### 9.2. Consideraciones de seguridad
 
-Para un despliegue público se necesitarían HTTPS, gestión más robusta de credenciales, controles contra abusos y medidas adicionales de seguridad.
+La clave administrativa no se incorpora al código fuente ni al repositorio Git.
 
-## 8. Formato de errores
+El cliente utiliza un campo de contraseña y no guarda la clave en localStorage ni sessionStorage.
 
-Los errores controlados se devuelven como objetos JSON.
+Este mecanismo representa un control básico para la demostración académica local. No equivale a un sistema de usuarios con roles.
+
+Antes de un despliegue público serían necesarios HTTPS, una gestión más robusta de credenciales y controles adicionales contra abusos.
+
+## 10. Manejo de excepciones
+
+Los errores controlados utilizan respuestas JSON con la propiedad `error`.
 
 Ejemplo:
 
@@ -291,85 +388,152 @@ Ejemplo:
 }
 ```
 
-Otro ejemplo:
+Se incorporaron dos manejadores adicionales.
+
+### JsonMalformadoMapper
+
+Gestiona errores de sintaxis en solicitudes JSON.
+
+Código: HTTP 400.
 
 ```json
 {
-  "error": "La clave administrativa no es valida."
+  "error": "El contenido JSON de la solicitud no es valido."
 }
 ```
 
-Esto permite que los clientes interpreten los errores y muestren mensajes comprensibles al usuario.
+### TipoContenidoMapper
 
-## 9. Cliente consumidor
+Gestiona tipos de contenido incompatibles.
 
-El archivo `cliente-rest.html` contiene una aplicación JavaScript independiente de JSF.
+Código: HTTP 415.
 
-El cliente utiliza `fetch()` para:
+```json
+{
+  "error": "Tipo de contenido no admitido. Utilice application/json."
+}
+```
 
-- Consultar viviendas mediante GET.
-- Consultar detalles de viviendas.
-- Consultar reseñas.
-- Registrar reseñas mediante POST.
+Ambos manejadores fueron comprobados mediante curl.
+
+## 11. Cliente consumidor JavaScript
+
+El archivo `src/main/webapp/cliente-rest.html` implementa una interfaz independiente de JSF.
+
+Utiliza JavaScript y `fetch()` para comunicarse con la API REST.
+
+### 11.1. Funcionalidades públicas
+
+El cliente permite:
+
+- Consultar viviendas.
+- Consultar detalles de una vivienda.
+- Consultar reseñas registradas.
+- Publicar reseñas.
+- Actualizar la información después del registro.
 - Mostrar mensajes de carga, éxito y error.
-- Actualizar las reseñas después de registrarlas.
 
-El cliente mantiene el diseño visual utilizado en las fases anteriores, con paneles, fondos degradados y botones estilizados.
+### 11.2. Administración de viviendas
 
-Las operaciones administrativas POST, PUT y DELETE de viviendas todavía no tienen formularios propios en este cliente.
+El cliente incorpora una sección denominada "Administrar viviendas".
 
-## 10. Pruebas realizadas
+Permite:
 
-Durante el desarrollo se comprobaron los siguientes comportamientos:
-
-| Caso | Resultado |
+| Operación | Método REST |
 |---|---|
-| Consulta de estado de la API | HTTP 200 |
-| Consulta de todas las viviendas | HTTP 200 |
-| Consulta de vivienda existente | HTTP 200 |
-| Identificador inválido | HTTP 400 |
-| Vivienda inexistente | HTTP 404 |
-| Registro válido de vivienda | HTTP 201 |
-| Registro con precio negativo | HTTP 400 |
-| Actualización válida de vivienda | HTTP 200 |
-| Actualización con precio inválido | HTTP 400 |
-| Eliminación válida | HTTP 204 |
-| Eliminación de vivienda con reseñas | HTTP 409 |
-| Registro válido de reseña | HTTP 201 |
-| Reseña con calificación fuera del rango | HTTP 400 |
-| Operación administrativa sin configuración de clave | HTTP 503 |
-| Operación administrativa sin credencial | HTTP 401 |
-| Operación administrativa con clave incorrecta | HTTP 403 |
-| Operación autorizada que infringe integridad | HTTP 409 |
-| Consulta y publicación de reseñas desde JavaScript | Funcionamiento comprobado |
+| Agregar vivienda | POST |
+| Editar vivienda | PUT |
+| Eliminar vivienda | DELETE |
 
-Estas comprobaciones se realizaron manualmente mediante Firefox, Git Bash con `curl`, el cliente JavaScript y la interfaz JSF.
+El formulario incluye título, tipo, dirección, zona, precio, habitaciones, descripción y disponibilidad.
 
-## 11. Limitaciones y mejoras pendientes
+Para editar, el cliente consulta primero los datos mediante GET y los incorpora al formulario.
 
-Al finalizar las pruebas principales se identifican los siguientes aspectos por revisar:
+Como el GET actual no devuelve `disponible`, el usuario debe seleccionar expresamente la disponibilidad antes de guardar la edición.
 
-- Incorporar la disponibilidad a las respuestas JSON de viviendas.
-- Revisar el control de acceso antes de publicar la aplicación fuera del entorno local.
-- Incorporar protección frente a envíos abusivos de reseñas.
-- Ampliar el cliente consumidor con operaciones administrativas autorizadas.
-- Preparar una colección de pruebas reutilizable y los casos límite adicionales.
-- Completar las evidencias y documentación de entrega.
+La eliminación requiere confirmación del usuario antes de enviar DELETE.
 
-## 12. Repositorio
+Los botones administrativos se muestran cuando se abre la sección correspondiente.
 
-**GitHub:** https://github.com/VictorZ23/AlquilaUDB
+### 11.3. Autorización desde el cliente
 
-El repositorio contiene el código fuente, las configuraciones del proyecto Maven y la documentación académica.
+La sección administrativa incluye un campo de tipo contraseña para introducir la clave.
 
-Las credenciales administrativas deben permanecer fuera del control de versiones.
+El cliente la envía mediante la cabecera X-API-Key.
 
-## 13. Conclusión
+La clave no se encuentra escrita en el código ni se almacena persistentemente en el navegador.
 
-La Fase III permitió incorporar servicios REST al sistema AlquilaUDB, reutilizando la persistencia empresarial de la fase anterior.
+La validación de autorización se realiza en el servidor.
 
-Se implementaron operaciones HTTP de consulta, registro, actualización y eliminación de viviendas, además de consultas y registro de reseñas.
+### 11.4. Mensajes al usuario
 
-También se desarrolló un cliente consumidor en HTML y JavaScript, se añadieron validaciones y respuestas de error JSON, y se implementó un control básico de autorización para las operaciones administrativas.
+El cliente presenta:
 
-La solución demuestra la integración de aplicaciones mediante HTTP, JSON, JAX-RS, Jersey, JPA, Hibernate y MySQL.
+- Estados de carga.
+- Confirmación de registros y actualizaciones.
+- Confirmación previa a la eliminación.
+- Mensajes de autorización incorrecta.
+- Mensajes de conflicto de integridad.
+- Mensajes ante fallos de comunicación.
+
+Los errores de red se traducen a un mensaje más comprensible para el usuario en la versión ampliada del cliente.
+
+### 11.5. Diseño
+
+La interfaz mantiene la identidad visual de AlquilaUDB mediante fondos azulados, tarjetas, paneles, formularios y botones.
+
+La versión ampliada permite demostrar el CRUD administrativo desde el navegador sin utilizar herramientas externas como curl.
+
+## 12. Pruebas realizadas
+
+Se comprobaron los siguientes resultados de la API.
+
+| Escenario | Resultado |
+|---|---|
+| Consultar viviendas | HTTP 200 |
+| Consultar recurso inexistente | HTTP 404 |
+| Enviar identificador inválido | HTTP 400 |
+| Registrar vivienda válida | HTTP 201 |
+| Registrar vivienda con precio inválido | HTTP 400 |
+| Actualizar vivienda | HTTP 200 |
+| Eliminar vivienda sin reseñas | HTTP 204 |
+| Eliminar vivienda con reseñas | HTTP 409 |
+| Registrar reseña válida | HTTP 201 |
+| Enviar reseña inválida | HTTP 400 |
+| Enviar JSON malformado | HTTP 400 JSON |
+| Enviar tipo de contenido incompatible | HTTP 415 JSON |
+| Solicitud administrativa sin configuración | HTTP 503 |
+| Solicitud administrativa sin credencial | HTTP 401 |
+| Solicitud administrativa con clave incorrecta | HTTP 403 |
+| Solicitud autorizada con conflicto de integridad | HTTP 409 |
+
+También se comprobó la persistencia del campo `disponible` en MySQL y la detección de interrupciones de comunicación desde el cliente.
+
+La interfaz JavaScript ampliada se encuentra implementada y su funcionamiento general fue confirmado. Las pruebas individuales de creación, edición y eliminación desde sus controles deben registrarse en la matriz de pruebas con evidencias específicas.
+
+Los resultados detallados se documentan en:
+
+`docs/matriz-pruebas-fase-III.md`
+
+## 13. Limitaciones y mejoras futuras
+
+- Incorporar `disponible` a las respuestas GET.
+- Completar evidencias individuales del CRUD desde el cliente JavaScript.
+- Incorporar protección contra envíos abusivos de reseñas.
+- Sustituir la clave administrativa compartida por un sistema de autenticación más robusto.
+- Utilizar HTTPS en cualquier despliegue fuera del entorno local.
+- Ampliar las pruebas automatizadas y de integración.
+
+## 14. Conclusión
+
+La Fase III incorporó servicios REST a AlquilaUDB, reutilizando la persistencia y las reglas de negocio de la Fase II.
+
+Se implementaron operaciones CRUD sobre viviendas, consulta y registro de reseñas, validaciones, respuestas HTTP apropiadas, autorización administrativa y manejadores de errores JSON.
+
+El cliente JavaScript se amplió para permitir tanto la consulta pública como la administración de viviendas desde el navegador.
+
+La solución demuestra la integración entre HTML, JavaScript, Jersey, JAX-RS, JPA, Hibernate y MySQL.
+
+---
+
+**Repositorio:** https://github.com/VictorZ23/AlquilaUDB
