@@ -1,302 +1,561 @@
 # AlquilaUDB
 
-**AlquilaUDB** es una aplicación web desarrollada en Java para gestionar y consultar ofertas de viviendas dirigidas a estudiantes universitarios.
+## Sistema web de gestión de viviendas para estudiantes universitarios
 
-El proyecto busca facilitar la búsqueda de alojamiento mediante un sistema que permite registrar, visualizar, modificar y eliminar viviendas, consultar su disponibilidad y publicar reseñas sobre las experiencias de alojamiento.
+**Universidad Don Bosco**  
+**Asignatura:** Desarrollo de Aplicaciones con Web Frameworks (DWF901)  
+**Estudiante:** Carlos Víctor Zaun Gómez  
+**Proyecto académico — Fases I, II y III**
 
-La aplicación se desarrolla como proyecto académico para la asignatura **Desarrollo de Aplicaciones con Web Frameworks (DWF901)** de la Universidad Don Bosco.
+---
 
 ## 1. Descripción del proyecto
 
-AlquilaUDB permite consultar información sobre viviendas, incluyendo su ubicación, precio mensual, tipo, cantidad de habitaciones y disponibilidad.
+AlquilaUDB es una aplicación web orientada a la consulta y administración de viviendas destinadas a estudiantes universitarios.
 
-También incorpora un sistema de reseñas para que los usuarios puedan compartir opiniones y calificaciones sobre las viviendas registradas.
+El sistema permite registrar, consultar, actualizar y eliminar viviendas, así como publicar reseñas y calificaciones.
 
-El desarrollo se ha realizado de manera incremental:
+El proyecto se desarrolló de manera incremental durante tres fases, incorporando diferentes tecnologías del ecosistema Java Web.
 
-- **Fase I:** aplicación Java Web con arquitectura MVC, Servlets, JSP, JSTL, JDBC y MySQL.
-- **Fase II:** incorporación de JSF, CDI, JPA, Hibernate, AJAX, validadores personalizados y relaciones entre entidades.
+Durante la Fase III se implementó una API REST que permite utilizar las funcionalidades del sistema desde clientes independientes mediante HTTP y JSON.
 
-La implementación anterior permanece disponible para comprobar la evolución del proyecto y la persistencia compartida en MySQL.
+También se desarrolló un cliente HTML y JavaScript que consume los servicios REST y permite realizar operaciones CRUD desde el navegador.
 
-## 2. Funcionalidades
+## 2. Objetivos
 
-### Gestión de viviendas
+### Objetivo general
 
-- Listar todas las viviendas registradas.
-- Registrar nuevas viviendas.
-- Consultar el detalle completo de una vivienda.
-- Editar viviendas existentes.
-- Eliminar viviendas, previa confirmación.
-- Consultar precios, zonas, direcciones y disponibilidad.
-- Buscar viviendas por título o zona.
-- Filtrar por tipo de vivienda.
-- Mostrar únicamente viviendas disponibles.
-- Limpiar los filtros y recuperar el listado completo.
+Desarrollar una aplicación web para gestionar viviendas estudiantiles, aplicando frameworks Java, persistencia de datos, servicios REST e integración de clientes.
 
-### Gestión de reseñas
+### Objetivos específicos
 
-- Consultar las reseñas asociadas a una vivienda.
-- Registrar nuevas reseñas.
-- Asignar calificaciones entre 1 y 5.
-- Almacenar el autor, comentario y fecha de cada reseña.
-- Relacionar las reseñas con su vivienda mediante JPA.
-- Impedir la eliminación de viviendas que tengan reseñas asociadas.
-
-### Validaciones y AJAX
-
-- Validación de campos obligatorios.
-- Validación de longitudes de texto.
-- Validación de precios y cantidades de habitaciones.
-- Validador JSF personalizado para los comentarios de reseñas.
-- Mensajes de error durante la interacción con los formularios.
-- Validación parcial de campos mediante AJAX.
-- Búsqueda y actualización de resultados sin recargar completamente la página.
+- Implementar operaciones CRUD sobre viviendas.
+- Consultar viviendas y sus características.
+- Incorporar filtros de búsqueda.
+- Gestionar reseñas y calificaciones.
+- Integrar una base de datos MySQL.
+- Utilizar JDBC, JPA e Hibernate.
+- Desarrollar servicios REST mediante Jersey.
+- Intercambiar información utilizando JSON.
+- Implementar un cliente JavaScript independiente.
+- Incorporar validaciones y manejo de errores.
+- Proteger las operaciones administrativas de la API.
+- Documentar el desarrollo y las pruebas realizadas.
 
 ## 3. Tecnologías utilizadas
 
-| Tecnología | Versión o implementación |
+| Tecnología | Utilización |
 |---|---|
-| Lenguaje | Java 11 |
-| Construcción | Apache Maven |
-| Servidor | Apache Tomcat 9 |
-| Base de datos | MySQL |
-| Acceso a datos de Fase I | JDBC |
-| Controladores de Fase I | Java Servlets |
-| Vistas de Fase I | JSP y JSTL |
-| Vistas de Fase II | JavaServer Faces (JSF) 2.3 |
-| Persistencia de Fase II | JPA 2.2 e Hibernate ORM 5.6 |
-| Inyección de dependencias | CDI mediante Weld |
-| Interacción asíncrona | AJAX de JSF |
-| Interfaz | XHTML, HTML y CSS |
-| IDE utilizado | Apache NetBeans 11.3 |
-| Control de versiones | Git y GitHub |
+| Java 11 | Lenguaje principal |
+| Apache Maven | Gestión de dependencias |
+| Apache Tomcat 9 | Servidor de aplicaciones web |
+| NetBeans 11.3 | Entorno de desarrollo |
+| MySQL | Base de datos relacional |
+| XAMPP | Entorno local de MySQL |
+| JDBC | Acceso a datos en la Fase I |
+| JSP y JSTL | Vistas de la Fase I |
+| Servlets | Controladores de la Fase I |
+| JSF 2.3 | Interfaz de la Fase II |
+| CDI / Weld | Gestión de componentes |
+| JPA / Hibernate | Persistencia de la Fase II y III |
+| Jersey 2.48 | Implementación REST |
+| JAX-RS | Definición de servicios HTTP |
+| Jackson | Procesamiento JSON |
+| HTML5 y CSS3 | Interfaces web |
+| JavaScript / fetch() | Cliente REST |
+| Git y GitHub | Control de versiones |
 
-Durante el desarrollo se utilizaron **Mojarra 2.3.9**, **Hibernate 5.6.15.Final** y **Weld 3.1.9.Final**, configurados mediante Maven para funcionar con Java 11 y Tomcat 9.
+## 4. Desarrollo por fases
 
-## 4. Arquitectura del proyecto
+### 4.1. Fase I — JSP, Servlets y JDBC
 
-AlquilaUDB conserva dos implementaciones del módulo de viviendas.
+En la primera fase se implementó una aplicación web basada en el patrón MVC.
 
-### Fase I: MVC con JDBC
+Sus principales características incluyen:
 
-- `com.alquilaudb.model`: representación de las viviendas.
-- `com.alquilaudb.dao`: operaciones JDBC mediante `ViviendaDAO`.
-- `com.alquilaudb.controller`: procesamiento de peticiones mediante `ViviendaServlet`.
-- `com.alquilaudb.util`: conexión y utilidades para MySQL.
-- Páginas JSP: interfaz de consulta y administración.
+- Listado de viviendas.
+- Consulta de detalles.
+- Registro de viviendas.
+- Edición de viviendas.
+- Eliminación con confirmación.
+- Validaciones básicas.
+- Conexión a MySQL mediante JDBC.
+- Separación entre vistas, controladores y DAO.
 
-### Fase II: JSF, CDI y JPA
+Se utilizaron JSP, JSTL y Servlets.
 
-- `com.alquilaudb.model`: entidades JPA `Vivienda` y `Resena`.
-- `com.alquilaudb.jpa`: operaciones de persistencia con `EntityManager`, consultas JPQL y transacciones.
-- `com.alquilaudb.bean`: Managed Beans CDI utilizados por las páginas JSF.
-- `com.alquilaudb.validator`: validadores JSF personalizados.
-- Páginas XHTML: interfaz de administración, consultas y reseñas.
+### 4.2. Fase II — JSF, CDI, JPA e Hibernate
 
-La arquitectura de la Fase II sigue el flujo:
+En la segunda fase se incorporó una nueva capa de presentación mediante JSF y una capa de persistencia mediante JPA e Hibernate.
 
-**Interfaz JSF → Managed Bean CDI → DAO JPA → Hibernate → MySQL**
+Se implementaron:
 
-Las operaciones de escritura utilizan transacciones con confirmación (`commit`) y reversión (`rollback`) en caso de error.
+- Listado de viviendas con JSF.
+- Búsqueda por título y zona.
+- Filtros por tipo y disponibilidad.
+- Registro y edición de viviendas.
+- Consulta de detalles.
+- Eliminación controlada.
+- Reseñas y calificaciones.
+- Validaciones de formularios.
+- Interacciones AJAX.
+- Relaciones entre entidades JPA.
 
-## 5. Modelo de datos
+También se incorporó una regla de integridad que impide eliminar viviendas con reseñas asociadas.
 
-La aplicación utiliza una base de datos MySQL denominada:
+Las funcionalidades de la Fase I se conservaron.
+
+### 4.3. Fase III — API REST y cliente JavaScript
+
+En la tercera fase se implementó una API REST utilizando Jersey y JAX-RS.
+
+La API permite:
+
+- Consultar viviendas.
+- Consultar una vivienda específica.
+- Registrar viviendas.
+- Actualizar viviendas.
+- Eliminar viviendas.
+- Consultar reseñas.
+- Registrar reseñas.
+- Comprobar el estado de la API.
+
+Las solicitudes utilizan HTTP y JSON.
+
+También se implementaron:
+
+- Validaciones del lado del servidor.
+- Códigos HTTP apropiados.
+- Manejo de errores JSON.
+- Protección administrativa mediante API Key.
+- Cliente consumidor desarrollado con HTML y JavaScript.
+
+Posteriormente, el cliente JavaScript se amplió para incorporar formularios de creación y edición, botones de eliminación y confirmación previa al borrado.
+
+De esta manera, el CRUD REST puede utilizarse desde el navegador sin depender de herramientas como curl.
+
+## 5. Arquitectura del sistema
+
+El proyecto conserva las funcionalidades de las fases anteriores y añade nuevos mecanismos de acceso.
+
+### Fase I
+
+JSP / JSTL → Servlets → DAO JDBC → MySQL
+
+### Fase II
+
+JSF → Managed Beans / CDI → DAO JPA → Hibernate → MySQL
+
+### Fase III
+
+Cliente HTML / JavaScript  
+↓  
+HTTP / JSON  
+↓  
+Jersey / JAX-RS  
+↓  
+Recursos REST y filtros  
+↓  
+ViviendaJpaDAO  
+↓  
+JPA / Hibernate  
+↓  
+MySQL
+
+Los diferentes módulos utilizan la misma base de datos.
+
+## 6. Estructura principal del proyecto
+
+```text
+AlquilaUDB/
+├── database/
+│   └── alquilaudb.sql
+│
+├── docs/
+│   ├── api-rest-fase-III.md
+│   ├── matriz-pruebas-fase-II.md
+│   ├── matriz-pruebas-fase-III.md
+│   ├── product-backlog-fase-II.md
+│   └── product-backlog-fase-III.md
+│
+├── src/
+│   └── main/
+│       ├── java/
+│       │   └── com/alquilaudb/
+│       │       ├── api/
+│       │       ├── bean/
+│       │       ├── controller/
+│       │       ├── dao/
+│       │       ├── jpa/
+│       │       └── model/
+│       │
+│       ├── resources/
+│       │
+│       └── webapp/
+│           ├── css/
+│           ├── cliente-rest.html
+│           ├── viviendas-jpa.xhtml
+│           ├── registrar-vivienda.xhtml
+│           ├── editar-vivienda.xhtml
+│           ├── detalle-vivienda.xhtml
+│           ├── resenas.xhtml
+│           └── archivos JSP de la Fase I
+│
+├── pom.xml
+└── README.md
+```
+
+La estructura representa los principales módulos del proyecto.
+
+## 7. Base de datos
+
+El proyecto utiliza la base de datos:
 
 `alquilaudb`
 
-Contiene dos tablas principales.
-
-### Tabla `vivienda`
-
-Almacena las ofertas de alojamiento mediante los campos:
-
-`id`, `titulo`, `tipo`, `direccion`, `zona`, `precio`, `habitaciones`, `descripcion` y `disponible`.
-
-### Tabla `resena`
-
-Almacena las opiniones mediante los campos:
-
-`id`, `vivienda_id`, `autor`, `calificacion`, `comentario` y `fecha`.
-
-### Relación entre entidades
-
-Existe una relación **uno a muchos (1:N)**:
-
-- Una vivienda puede tener varias reseñas.
-- Cada reseña pertenece a una vivienda.
-
-La relación está implementada con las anotaciones JPA `@OneToMany`, `@ManyToOne` y `@JoinColumn`.
-
-La columna `resena.vivienda_id` es una clave foránea que referencia `vivienda.id`.
-
-La base de datos utiliza `ON DELETE RESTRICT` para evitar que se eliminen viviendas que tengan reseñas asociadas.
-
-## 6. Instalación de la base de datos
-
-El script SQL del proyecto está ubicado en:
+El archivo:
 
 `database/alquilaudb.sql`
 
-Para instalarlo en una base de datos nueva:
+contiene el script para preparar la estructura utilizada por la aplicación.
 
-1. Iniciar el servicio MySQL.
-2. Abrir phpMyAdmin o un cliente MySQL.
-3. Ejecutar el contenido de `database/alquilaudb.sql`.
-4. Comprobar que existen las tablas `vivienda` y `resena`.
+### Tabla vivienda
 
-El script crea la estructura de la base de datos y sus relaciones. **No inserta registros de ejemplo**.
+Almacena:
 
-No es necesario ejecutarlo nuevamente sobre una instalación local que ya tenga las tablas creadas.
+- Identificador.
+- Título.
+- Tipo.
+- Dirección.
+- Zona.
+- Precio.
+- Habitaciones.
+- Descripción.
+- Disponibilidad.
 
-## 7. Configuración de MySQL
+### Tabla resena
 
-La aplicación contiene dos mecanismos de acceso a datos.
+Almacena:
 
-### Conexión JDBC
+- Identificador.
+- Vivienda relacionada.
+- Autor.
+- Calificación.
+- Comentario.
+- Fecha.
 
-La configuración de la Fase I se encuentra en:
+Las reseñas se relacionan con las viviendas mediante una clave foránea.
 
-`src/main/java/com/alquilaudb/util/Conexion.java`
-
-### Conexión JPA e Hibernate
-
-La configuración de la Fase II se encuentra en:
-
-`src/main/resources/META-INF/persistence.xml`
-
-La unidad de persistencia se denomina:
-
-`AlquilaUDBPU`
-
-Y utiliza transacciones de tipo `RESOURCE_LOCAL`.
-
-Durante el desarrollo local se utilizó la siguiente conexión:
-
-- Servidor: `localhost`
-- Puerto: `3306`
-- Base de datos: `alquilaudb`
-- Usuario local de desarrollo: `root`
-
-Las credenciales deben adaptarse al entorno donde se ejecute la aplicación. No deben publicarse contraseñas reales en el repositorio.
-
-Hibernate tiene configurado `hibernate.hbm2ddl.auto=none`, de modo que no crea ni altera automáticamente las tablas. La estructura se prepara mediante el script SQL.
+El sistema no permite eliminar una vivienda cuando tiene reseñas asociadas.
 
 ## 8. Requisitos para ejecutar el proyecto
 
 Se necesita:
 
-- JDK 11.
-- Apache Maven.
-- Apache Tomcat 9.
-- MySQL compatible con el script SQL.
-- Un navegador web.
+1. JDK 11.
+2. Apache NetBeans 11.3 o un IDE compatible.
+3. Apache Maven.
+4. Apache Tomcat 9.
+5. MySQL.
+6. Un navegador web moderno.
 
-El proyecto se desarrolló con NetBeans 11.3 y se probó con Tomcat 9.0.121.
+Durante el desarrollo se utilizó XAMPP para ejecutar MySQL localmente.
 
-Tomcat debe contar con la configuración necesaria para ejecutar JSF y CDI mediante las dependencias incluidas en el proyecto.
+## 9. Instalación y ejecución
 
-## 9. Compilación y ejecución
+### 9.1. Obtener el proyecto
 
-1. Clonar el repositorio de GitHub:
+Clonar el repositorio:
 
-   `git clone https://github.com/VictorZ23/AlquilaUDB.git`
+```bash
+git clone https://github.com/VictorZ23/AlquilaUDB.git
+```
 
-2. Abrir el proyecto Maven en NetBeans o desde una terminal.
+También puede descargarse desde GitHub.
 
-3. Crear la base de datos ejecutando el script `database/alquilaudb.sql` en MySQL.
+### 9.2. Preparar MySQL
 
-4. Configurar las conexiones de `Conexion.java` y `persistence.xml` según las credenciales locales.
+1. Iniciar MySQL desde XAMPP.
+2. Abrir phpMyAdmin.
+3. Importar el script `database/alquilaudb.sql`.
+4. Verificar que exista la base de datos `alquilaudb`.
+5. Comprobar que se hayan creado las tablas necesarias.
 
-5. Compilar el proyecto mediante:
+### 9.3. Configurar la conexión
 
-   `mvn clean package`
+Revisar las configuraciones de acceso a MySQL utilizadas por JDBC y JPA.
 
-6. Desplegar el archivo WAR generado en Apache Tomcat 9.
+La unidad de persistencia JPA se denomina:
 
-7. Configurar el contexto de despliegue como `/AlquilaUDB`. Si se utiliza el administrador de Tomcat, puede desplegarse con ese contexto; alternativamente, puede utilizarse el nombre `AlquilaUDB.war` cuando corresponda.
+`AlquilaUDBPU`
 
-8. Iniciar Tomcat y acceder a las páginas del proyecto.
+La aplicación utiliza persistencia local con Hibernate.
 
-Durante el desarrollo en NetBeans se utiliza:
+Las credenciales y parámetros deben ajustarse al entorno donde se ejecutará el proyecto.
 
-`http://localhost:8080/AlquilaUDB`
+No deben publicarse contraseñas reales en el repositorio.
 
-### Principales direcciones
+### 9.4. Abrir el proyecto
 
-| Funcionalidad | Dirección |
+1. Abrir NetBeans.
+2. Seleccionar File → Open Project.
+3. Elegir la carpeta AlquilaUDB.
+4. Comprobar que Maven cargue las dependencias.
+5. Configurar Apache Tomcat 9 como servidor.
+
+### 9.5. Compilar
+
+Desde NetBeans:
+
+1. Detener Tomcat si se encuentra ejecutándose.
+2. Seleccionar Clean and Build.
+3. Comprobar que aparezca BUILD SUCCESS.
+4. Ejecutar el proyecto mediante Run.
+
+También puede compilarse desde la carpeta principal mediante:
+
+```bash
+mvn clean package
+```
+
+### 9.6. Acceder a la aplicación
+
+Las direcciones corresponden a Tomcat ejecutándose localmente en el puerto 8080.
+
+**Módulo JSF:**
+
+http://localhost:8080/AlquilaUDB/viviendas-jpa.xhtml
+
+**Cliente REST JavaScript:**
+
+http://localhost:8080/AlquilaUDB/cliente-rest.html
+
+**Estado de la API:**
+
+http://localhost:8080/AlquilaUDB/api/estado
+
+**Listado JSON de viviendas:**
+
+http://localhost:8080/AlquilaUDB/api/viviendas
+
+## 10. Endpoints REST
+
+La dirección base es:
+
+`http://localhost:8080/AlquilaUDB/api`
+
+| Método | Ruta | Descripción | Acceso |
+|---|---|---|---|
+| GET | /estado | Estado de la API | Público |
+| GET | /viviendas | Listar viviendas | Público |
+| GET | /viviendas/{id} | Consultar vivienda | Público |
+| POST | /viviendas | Registrar vivienda | Administrativo |
+| PUT | /viviendas/{id} | Actualizar vivienda | Administrativo |
+| DELETE | /viviendas/{id} | Eliminar vivienda | Administrativo |
+| GET | /viviendas/{id}/resenas | Consultar reseñas | Público |
+| POST | /viviendas/{id}/resenas | Registrar reseña | Público |
+
+### Ejemplo de consulta
+
+```bash
+curl -i http://localhost:8080/AlquilaUDB/api/viviendas
+```
+
+La respuesta correcta devuelve HTTP 200 y una colección JSON.
+
+### Ejemplo de registro de reseña
+
+```json
+{
+  "autor": "Estudiante",
+  "calificacion": 5,
+  "comentario": "La vivienda se encuentra en buenas condiciones."
+}
+```
+
+Para conocer todos los parámetros y las reglas de validación, consultar:
+
+[Documentación REST de la Fase III](docs/api-rest-fase-III.md)
+
+## 11. Seguridad de la API
+
+Las operaciones administrativas sobre viviendas requieren una clave de acceso.
+
+El servidor obtiene la clave mediante la variable de entorno:
+
+`ALQUILAUDB_API_KEY`
+
+La clave configurada debe tener al menos 24 caracteres.
+
+Los clientes autorizados envían la credencial en la cabecera:
+
+`X-API-Key`
+
+### Configuración local
+
+En Windows:
+
+1. Abrir Variables de entorno.
+2. Crear la variable de usuario `ALQUILAUDB_API_KEY`.
+3. Asignarle una clave segura de al menos 24 caracteres.
+4. Reiniciar NetBeans y Tomcat para que reciban la configuración.
+
+No incluir la clave en archivos versionados.
+
+### Respuestas de seguridad
+
+| HTTP | Situación |
 |---|---|
-| Listado original con JDBC | `/AlquilaUDB/vivienda` |
-| Listado JSF y JPA | `/AlquilaUDB/viviendas-jpa.xhtml` |
-| Registrar vivienda | `/AlquilaUDB/registrar-vivienda.xhtml` |
-| Detalle de vivienda | `/AlquilaUDB/detalle-vivienda.xhtml?id=1` |
-| Editar vivienda | `/AlquilaUDB/editar-vivienda.xhtml?id=1` |
-| Consultar y registrar reseñas | `/AlquilaUDB/resenas.xhtml?id=1` |
+| 401 | Falta la credencial administrativa |
+| 403 | La credencial es incorrecta |
+| 503 | La clave del servidor no está configurada correctamente |
 
-En las direcciones que contienen `id=1`, el identificador debe sustituirse por el de una vivienda existente.
+La autorización no elimina las reglas de negocio.
 
-La página inicial del proyecto puede conservar contenido de demostración. Para acceder a las funcionalidades de la Fase II, se recomienda abrir directamente `viviendas-jpa.xhtml`.
+Por ejemplo, una solicitud autorizada para eliminar una vivienda con reseñas sigue recibiendo HTTP 409.
 
-## 10. Persistencia y reglas de negocio
+Este mecanismo es una protección básica para el entorno académico local.
 
-Las operaciones de la Fase I utilizan JDBC y sentencias SQL parametrizadas.
+No debe considerarse suficiente para publicar la aplicación en Internet sin HTTPS y controles adicionales.
 
-La Fase II utiliza Hibernate como proveedor JPA y `EntityManager` para gestionar entidades y transacciones.
+## 12. Cliente REST JavaScript
 
-Se implementaron operaciones de registro, consulta, actualización y eliminación de viviendas.
+El archivo:
 
-Las búsquedas utilizan JPQL con parámetros para filtrar viviendas por texto, tipo y disponibilidad.
+`src/main/webapp/cliente-rest.html`
 
-En el módulo de reseñas se aplican reglas como:
+implementa una interfaz independiente de JSF.
 
-- Calificaciones entre 1 y 5.
-- Validación de autor y comentario.
-- Asociación obligatoria de cada reseña con una vivienda existente.
-- Protección contra la eliminación de viviendas con reseñas relacionadas.
+### Funciones públicas
 
-## 11. Pruebas realizadas
+- Consultar viviendas.
+- Consultar detalles.
+- Consultar reseñas.
+- Registrar reseñas.
+- Actualizar información.
+- Mostrar mensajes de carga y error.
 
-Durante el desarrollo se comprobaron manualmente los siguientes escenarios:
+### Administración de viviendas
 
-- Consulta de viviendas desde JDBC y JPA.
-- Registro de una vivienda y visualización desde ambas implementaciones.
-- Actualización de una vivienda y persistencia de sus cambios.
-- Eliminación de viviendas de prueba.
-- Validación de campos mediante AJAX.
-- Registro y consulta de reseñas asociadas a viviendas.
-- Uso de un validador JSF personalizado.
-- Búsqueda y filtrado de viviendas mediante JPQL.
-- Visualización detallada de viviendas.
-- Navegación entre las páginas principales.
+El cliente incorpora el botón:
 
-Las evidencias de estas comprobaciones se organizarán en la documentación correspondiente a la Fase II.
+**Administrar viviendas**
 
-## 12. Control de versiones
+Desde esa sección se pueden realizar las siguientes operaciones:
 
-El código fuente del proyecto se administra con Git y se encuentra disponible en GitHub:
+- Agregar viviendas mediante POST.
+- Editar viviendas mediante PUT.
+- Eliminar viviendas mediante DELETE.
+- Confirmar las eliminaciones.
+- Visualizar mensajes de error y éxito.
 
-**Repositorio:** https://github.com/VictorZ23/AlquilaUDB
+Las operaciones protegidas requieren introducir la clave administrativa.
 
-Los avances se registran mediante commits que permiten identificar la incorporación de las funcionalidades y recuperar versiones anteriores del proyecto.
+La clave no se almacena de forma persistente en el navegador.
 
-## 13. Estado y evolución del proyecto
+### Disponibilidad
 
-### Fase I
+El formulario permite seleccionar si una vivienda está disponible.
 
-Implementación del módulo inicial de viviendas mediante Servlets, JSP, JSTL, JDBC y MySQL.
+Actualmente, las respuestas GET no incluyen el valor de `disponible`.
+
+Por esta razón, al editar una vivienda, el usuario debe seleccionar explícitamente su disponibilidad antes de guardar.
+
+## 13. Validaciones y errores
+
+La API valida los datos antes de realizar operaciones sobre la base de datos.
+
+Entre las validaciones se incluyen:
+
+- Longitud de títulos y direcciones.
+- Precios positivos.
+- Cantidad válida de habitaciones.
+- Calificaciones enteras entre 1 y 5.
+- Longitud de comentarios.
+- Identificadores positivos.
+- Existencia de recursos.
+- Restricciones de integridad.
+
+También se incorporaron manejadores de errores para JSON malformado y tipos de contenido incompatibles.
+
+### Principales códigos HTTP
+
+| Código | Significado |
+|---|---|
+| 200 | Operación correcta |
+| 201 | Recurso creado |
+| 204 | Recurso eliminado |
+| 400 | Solicitud incorrecta |
+| 401 | Credencial ausente |
+| 403 | Credencial incorrecta |
+| 404 | Recurso inexistente |
+| 409 | Conflicto de integridad |
+| 415 | Tipo de contenido incompatible |
+| 503 | Seguridad administrativa no configurada |
+
+Los errores controlados se representan mediante objetos JSON.
+
+## 14. Pruebas realizadas
+
+Durante la Fase III se comprobaron:
+
+- Consultas REST.
+- Registro de viviendas.
+- Actualización de viviendas.
+- Eliminación de viviendas.
+- Registro y consulta de reseñas.
+- Validaciones de datos.
+- Recursos inexistentes.
+- JSON malformado.
+- Tipos de contenido incompatibles.
+- Seguridad administrativa.
+- Restricciones de integridad.
+- Persistencia del campo disponible.
+- Recuperación del cliente ante fallos de conexión.
+
+Las pruebas LIM-01 a LIM-10 fueron completadas.
+
+La ampliación administrativa del cliente JavaScript se encuentra implementada. Sus pruebas individuales y evidencias visuales se registran por separado en la matriz de pruebas.
+
+## 15. Documentación del proyecto
 
 ### Fase II
 
-Incorporación de JSF, CDI, JPA, Hibernate, AJAX, validadores personalizados y la entidad `Resena`.
+- [Matriz de pruebas](docs/matriz-pruebas-fase-II.md)
+- [Product Backlog](docs/product-backlog-fase-II.md)
 
-El incremento incluye un CRUD funcional, consultas JPQL, relaciones entre entidades y validaciones de formularios.
+### Fase III
 
-### Próximas fases
+- [Documentación técnica de la API REST](docs/api-rest-fase-III.md)
+- [Matriz de pruebas](docs/matriz-pruebas-fase-III.md)
+- [Product Backlog](docs/product-backlog-fase-III.md)
 
-El proyecto continuará evolucionando conforme a los requisitos académicos de las siguientes entregas, incluyendo integración mediante servicios y otras tecnologías empresariales.
+La documentación contiene los criterios de aceptación, las pruebas y el estado de las funcionalidades implementadas.
+
+## 16. Limitaciones y mejoras futuras
+
+Entre las mejoras identificadas se encuentran:
+
+- Incorporar el campo disponible a las respuestas GET.
+- Implementar autenticación con usuarios y roles.
+- Utilizar HTTPS en un despliegue público.
+- Añadir protección contra publicaciones abusivas de reseñas.
+- Incorporar pruebas automatizadas.
+- Ampliar las evidencias individuales del CRUD JavaScript.
+
+## 17. Conclusión
+
+AlquilaUDB evolucionó desde una aplicación Java Web basada en JSP, Servlets y JDBC hacia una solución que incorpora JSF, CDI, JPA, Hibernate, servicios REST y un cliente JavaScript independiente.
+
+La implementación conserva la integración con MySQL y reutiliza las reglas de negocio desarrolladas en las fases anteriores.
+
+La Fase III permite consumir la información mediante HTTP y JSON, incorporando operaciones CRUD, validaciones, manejo de errores y controles básicos de seguridad.
+
+El cliente JavaScript ampliado permite demostrar las principales operaciones directamente desde el navegador.
+
+El proyecto documenta así la integración entre frontend, servicios web y persistencia de datos.
 
 ---
 
-**AlquilaUDB — Universidad Don Bosco**  
-**Asignatura:** Desarrollo de Aplicaciones con Web Frameworks (DWF901)
+**Repositorio oficial:**  
+https://github.com/VictorZ23/AlquilaUDB
